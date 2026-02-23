@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
 /**
@@ -10,9 +10,33 @@ export const ExportPanel = ({ videoId, selectedFrames }) => {
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [customPrefix, setCustomPrefix] = useState('');
+  const [useVideoName, setUseVideoName] = useState(true);
+  const [videoInfo, setVideoInfo] = useState(null);
 
   const selectedCount = selectedFrames.size;
   const selectedArray = Array.from(selectedFrames).sort((a, b) => a - b);
+
+  // 获取视频信息
+  useEffect(() => {
+    const fetchVideoInfo = async () => {
+      try {
+        const response = await api.getVideoInfo(videoId);
+        setVideoInfo(response.data);
+        // 默认使用视频文件名（去掉扩展名）作为前缀
+        if (response.data.filename) {
+          const nameWithoutExt = response.data.filename.replace(/\.[^/.]+$/, '');
+          setCustomPrefix(nameWithoutExt);
+        }
+      } catch (err) {
+        console.error('获取视频信息失败:', err);
+      }
+    };
+
+    if (videoId) {
+      fetchVideoInfo();
+    }
+  }, [videoId]);
 
   // 处理导出
   const handleExport = async () => {
@@ -26,15 +50,19 @@ export const ExportPanel = ({ videoId, selectedFrames }) => {
     setSuccess(null);
 
     try {
+      // 确定文件名前缀
+      const prefix = useVideoName && customPrefix ? customPrefix : 'frame';
+
       // 导出帧
       const exportResponse = await api.exportFrames(
         videoId,
         selectedArray,
         format,
-        quality
+        quality,
+        prefix
       );
 
-      const { export_id, file_count } = exportResponse.data;
+      const { export_id, file_count, zip_filename } = exportResponse.data;
       console.log('导出成功:', exportResponse.data);
 
       // 下载ZIP文件
@@ -45,7 +73,8 @@ export const ExportPanel = ({ videoId, selectedFrames }) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `video_frames_${export_id.slice(0, 8)}.zip`;
+      // 使用服务器返回的文件名，或使用默认文件名
+      link.download = zip_filename || `${prefix}_frames.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -70,6 +99,31 @@ export const ExportPanel = ({ videoId, selectedFrames }) => {
       </div>
 
       <div className="export-options">
+        <div className="option-group">
+          <label>文件命名：</label>
+          <div className="naming-options">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={useVideoName}
+                onChange={(e) => setUseVideoName(e.target.checked)}
+              />
+              使用视频文件名
+            </label>
+            <input
+              type="text"
+              value={customPrefix}
+              onChange={(e) => setCustomPrefix(e.target.value)}
+              placeholder="自定义前缀（如：my_video）"
+              className="prefix-input"
+              disabled={!useVideoName}
+            />
+            <p className="naming-preview">
+              预览：{useVideoName && customPrefix ? customPrefix : 'frame'}_0001.{format === 'png' ? 'png' : 'jpg'}
+            </p>
+          </div>
+        </div>
+
         <div className="option-group">
           <label>导出格式：</label>
           <div className="radio-group">

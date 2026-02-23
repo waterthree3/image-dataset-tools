@@ -37,12 +37,23 @@ def export_frames(video_id):
         frame_indices = data.get('frames', [])
         export_format = data.get('format', 'jpeg').lower()
         quality = data.get('quality', 85)
+        prefix = data.get('prefix', 'frame')  # 获取自定义前缀，默认为'frame'
 
         if export_format not in ['png', 'jpeg', 'jpg']:
             return jsonify({'error': 'Invalid format. Use "png" or "jpeg"'}), 400
 
         if not frame_indices:
             return jsonify({'error': 'No frames selected'}), 400
+
+        # 清理前缀，确保文件名安全
+        if prefix:
+            # 移除不安全的字符，只保留字母、数字、下划线、连字符
+            prefix = ''.join(c for c in prefix if c.isalnum() or c in ['_', '-', ' '])
+            prefix = prefix.strip().replace(' ', '_')
+            if not prefix:
+                prefix = 'frame'
+        else:
+            prefix = 'frame'
 
         # 生成导出ID
         export_id = str(uuid.uuid4())
@@ -61,7 +72,7 @@ def export_frames(video_id):
             if export_format == 'png':
                 # 转换为PNG
                 img = Image.open(frame_path)
-                output_filename = f'frame_{exported_count:04d}.png'
+                output_filename = f'{prefix}_{exported_count:04d}.png'
                 output_path = os.path.join(export_dir, output_filename)
                 img.save(output_path, 'PNG')
             else:
@@ -69,13 +80,13 @@ def export_frames(video_id):
                 if frame_path.endswith('.jpg') or frame_path.endswith('.jpeg'):
                     # 重新编码以应用质量设置
                     img = Image.open(frame_path)
-                    output_filename = f'frame_{exported_count:04d}.jpg'
+                    output_filename = f'{prefix}_{exported_count:04d}.jpg'
                     output_path = os.path.join(export_dir, output_filename)
                     img.save(output_path, 'JPEG', quality=quality)
                 else:
                     # 从其他格式转换
                     img = Image.open(frame_path)
-                    output_filename = f'frame_{exported_count:04d}.jpg'
+                    output_filename = f'{prefix}_{exported_count:04d}.jpg'
                     output_path = os.path.join(export_dir, output_filename)
                     img.save(output_path, 'JPEG', quality=quality)
 
@@ -86,8 +97,9 @@ def export_frames(video_id):
             shutil.rmtree(export_dir)
             return jsonify({'error': 'No frames were exported'}), 400
 
-        # 打包成ZIP
-        zip_filename = f'frames_{export_id}.zip'
+        # 打包成ZIP，文件名格式：{export_id}_{prefix}_frames.zip
+        # 这样可以通过export_id找到文件，同时保留自定义前缀
+        zip_filename = f'{export_id}_{prefix}_frames.zip'
         zip_path = os.path.join(config.EXPORT_FOLDER, zip_filename)
 
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -102,7 +114,8 @@ def export_frames(video_id):
             'export_id': export_id,
             'file_count': exported_count,
             'download_url': f'/api/exports/{export_id}/download',
-            'format': export_format
+            'format': export_format,
+            'zip_filename': zip_filename
         }), 200
 
     except Exception as e:
@@ -125,17 +138,39 @@ def download_export(export_id):
         ZIP文件
     """
     try:
-        zip_filename = f'frames_{export_id}.zip'
-        zip_path = os.path.join(config.EXPORT_FOLDER, zip_filename)
+        # 查找以export_id开头的ZIP文件
+        zip_path = None
+        zip_filename = None
 
-        if not os.path.exists(zip_path):
+        for filename in os.listdir(config.EXPORT_FOLDER):
+            if filename.startswith(export_id) and filename.endswith('.zip'):
+                zip_path = os.path.join(config.EXPORT_FOLDER, filename)
+                zip_filename = filename
+                break
+
+        # 兼容旧格式
+        if not zip_path:
+            old_format = f'frames_{export_id}.zip'
+            old_path = os.path.join(config.EXPORT_FOLDER, old_format)
+            if os.path.exists(old_path):
+                zip_path = old_path
+                zip_filename = old_format
+
+        if not zip_path or not os.path.exists(zip_path):
             return jsonify({'error': 'Export not found or expired'}), 404
+
+        # 从文件名中提取用户友好的下载名称
+        # 格式: {export_id}_{prefix}_frames.zip -> {prefix}_frames.zip
+        download_name = zip_filename
+        if zip_filename.startswith(export_id):
+            # 移除export_id前缀
+            download_name = zip_filename[len(export_id)+1:]  # +1 for the underscore
 
         return send_file(
             zip_path,
             mimetype='application/zip',
             as_attachment=True,
-            download_name=f'video_frames_{export_id[:8]}.zip'
+            download_name=download_name
         )
 
     except Exception as e:
@@ -154,11 +189,23 @@ def delete_export(export_id):
         JSON响应
     """
     try:
-        zip_filename = f'frames_{export_id}.zip'
-        zip_path = os.path.join(config.EXPORT_FOLDER, zip_filename)
+        # 查找以export_id开头的ZIP文件
+        deleted = False
+        for filename in os.listdir(config.EXPORT_FOLDER):
+            if filename.startswith(export_id) and filename.endswith('.zip'):
+                zip_path = os.path.join(config.EXPORT_FOLDER, filename)
+                if os.path.exists(zip_path):
+                    os.remove(zip_path)
+                    deleted = True
+                    break
 
-        if os.path.exists(zip_path):
-            os.remove(zip_path)
+        # 兼容旧格式
+        if not deleted:
+            old_format = f'frames_{export_id}.zip'
+            old_path = os.path.join(config.EXPORT_FOLDER, old_format)
+            if os.path.exists(old_path):
+                os.remove(old_path)
+                deleted = True
 
         return jsonify({'message': 'Export deleted successfully'}), 200
 

@@ -26,7 +26,16 @@ FRAME_CLEANUP_HOURS = 24  # 临时帧保留时间（小时）
 # API配置
 API_PREFIX = '/api'
 
+# Image batch processing paths
+IMAGE_BATCH_FOLDER = os.path.join(STORAGE_DIR, 'image_batches')
+IMAGE_EXPORT_FOLDER = os.path.join(STORAGE_DIR, 'image_exports')
+
+# Allowed image extensions for batch processing
+ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tif', 'gif'}
+
 # 确保存储目录存在
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(FRAME_FOLDER, exist_ok=True)
 os.makedirs(EXPORT_FOLDER, exist_ok=True)
+os.makedirs(IMAGE_BATCH_FOLDER, exist_ok=True)
+os.makedirs(IMAGE_EXPORT_FOLDER, exist_ok=True)

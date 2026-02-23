@@ -119,6 +119,106 @@ body {
   transition: width 0.3s ease;
 }
 
+/* FPS选择界面 */
+.fps-selection {
+  padding: 1rem;
+}
+
+.video-info-text {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.fps-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.fps-input-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.fps-input {
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.fps-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.fps-hint {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.fps-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.preset-btn {
+  flex: 1;
+  min-width: calc(50% - 0.25rem);
+  padding: 0.6rem;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.preset-btn:hover:not(:disabled) {
+  background: #e8ebff;
+  border-color: #667eea;
+}
+
+.preset-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.extraction-estimate {
+  background: #f8f9ff;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.start-extraction-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.start-extraction-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
 /* 错误消息 */
 .error-message {
   background: #fee;
@@ -314,6 +414,55 @@ body {
   color: #555;
 }
 
+.naming-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.prefix-input {
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.prefix-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.prefix-input:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.naming-preview {
+  font-size: 0.85rem;
+  color: #667eea;
+  background: #f8f9ff;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+}
+
 .radio-group {
   display: flex;
   gap: 1rem;
@@ -425,4 +574,740 @@ body {
 
 .frame-grid::-webkit-scrollbar-thumb:hover {
   background: #5568d3;
+}
+
+/* ================================================================
+   Tab navigation
+   ================================================================ */
+.tab-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tab-btn {
+  padding: 0.5rem 1.75rem;
+  background: transparent;
+  border: 2px solid #667eea;
+  color: #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.25s;
+}
+
+.tab-btn.active {
+  background: #667eea;
+  color: white;
+}
+
+.tab-btn:hover:not(.active) {
+  background: rgba(102, 126, 234, 0.12);
+}
+
+/* ================================================================
+   Image Batch Processor — container
+   ================================================================ */
+.image-processor {
+  padding: 0;
+}
+
+/* Upload area */
+.image-upload-area {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.image-upload-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.folder-select-btn,
+.file-select-btn {
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.folder-select-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.folder-select-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.file-select-btn {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.file-select-btn:hover:not(:disabled) {
+  background: #f0f2ff;
+}
+
+.folder-select-btn:disabled,
+.file-select-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-progress-info {
+  margin-top: 1.25rem;
+}
+
+.upload-progress-info p {
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* ================================================================
+   Image Processor — two-column layout
+   ================================================================ */
+.image-processor-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .image-processor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Left: image grid section ──────────────────────── */
+.image-batch-grid-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.image-batch-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f0f0f0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.toolbar-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toolbar-btns button {
+  padding: 0.35rem 0.85rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.toolbar-btns button:hover {
+  background: #5568d3;
+}
+
+/* Grid */
+.image-batch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  max-height: 620px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.image-batch-grid::-webkit-scrollbar       { width: 6px; }
+.image-batch-grid::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.image-batch-grid::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+
+/* Image card */
+.image-batch-item {
+  position: relative;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f5f5f5;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-batch-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transform: scale(1.03);
+}
+
+.image-batch-item.selected {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+}
+
+.image-batch-thumb {
+  width: 100%;
+  height: 110px;
+  object-fit: contain;
+  background: #eee;
+  display: block;
+}
+
+/* Overlay: checkbox + dimensions */
+.image-batch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+}
+
+.image-batch-overlay input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.image-dim {
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* Filename label */
+.image-batch-name {
+  font-size: 0.72rem;
+  color: #444;
+  padding: 0.3rem 0.4rem 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: white;
+  flex: 1;
+}
+
+/* Settings badge */
+.settings-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  text-align: center;
+}
+
+/* ── Right: settings panel ─────────────────────────── */
+.image-settings-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Settings component ────────────────────────────── */
+.image-process-settings h3 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.settings-hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Mode tabs */
+.mode-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 0.45rem 0.25rem;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.mode-tab.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.mode-tab:hover:not(.active) {
+  background: #e8ebff;
+  border-color: #667eea;
+}
+
+/* Mode description */
+.mode-desc {
+  font-size: 0.82rem;
+  color: #777;
+  margin: 0.5rem 0 0.75rem;
+  line-height: 1.5;
+}
+
+/* Size inputs row */
+.size-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.size-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.size-input-group label {
+  font-size: 0.78rem;
+  color: #555;
+  font-weight: normal;
+}
+
+.size-input {
+  padding: 0.5rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.size-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.size-sep {
+  font-size: 1rem;
+  color: #999;
+  padding-bottom: 0.35rem;
+  flex-shrink: 0;
+}
+
+/* Ratio presets */
+.ratio-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.4rem 0;
+}
+
+.ratio-preset-btn {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8rem;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ratio-preset-btn.active,
+.ratio-preset-btn:hover {
+  background: #e8ebff;
+  border-color: #667eea;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.ratio-preset-btn.active {
+  background: #667eea;
+  color: white;
+}
+
+/* Custom ratio inputs */
+.ratio-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.ratio-input {
+  width: 60px;
+  padding: 0.4rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.ratio-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.ratio-colon {
+  font-size: 1.1rem;
+  color: #555;
+  font-weight: 600;
+}
+
+/* Action buttons */
+.settings-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.apply-settings-btn {
+  flex: 2;
+  padding: 0.65rem 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.apply-settings-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+}
+
+.apply-settings-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.clear-settings-btn {
+  flex: 1;
+  padding: 0.65rem 0.5rem;
+  background: white;
+  color: #888;
+  border: 2px solid #ddd;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-settings-btn:hover:not(:disabled) {
+  border-color: #c33;
+  color: #c33;
+}
+
+.clear-settings-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Panel divider */
+.panel-divider {
+  border: none;
+  border-top: 2px solid #f0f0f0;
+  margin: 1rem 0;
+}
+
+/* Export format section */
+.export-format-section h4 {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* Process button */
+.process-button {
+  width: 100%;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.process-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+}
+
+.process-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty state */
+.image-empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: white;
+}
+
+.image-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.image-empty-state p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.image-empty-state .hint {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ================================================================
+   Crop anchor sliders
+   ================================================================ */
+.crop-anchor-group {
+  margin-top: 0.75rem;
+}
+
+.anchor-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.anchor-label-side {
+  font-size: 0.78rem;
+  color: #777;
+  width: 1.2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.anchor-slider {
+  flex: 1;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.anchor-slider-desc {
+  font-size: 0.73rem;
+  color: #aaa;
+  text-align: center;
+  margin-top: 0.2rem;
+}
+
+/* ================================================================
+   Pad alignment grid (3×3)
+   ================================================================ */
+.align-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: 120px;
+  margin: 0.5rem 0 0;
+}
+
+.align-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.15s;
+}
+
+.align-cell:hover {
+  background: #e8ebff;
+  border-color: #667eea;
+}
+
+.align-cell.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+/* ================================================================
+   Preview button (below settings panel)
+   ================================================================ */
+.preview-settings-btn {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.6rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preview-settings-btn:hover:not(:disabled) {
+  background: #f0f2ff;
+}
+
+.preview-settings-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ================================================================
+   Preview modal overlay
+   ================================================================ */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.preview-modal {
+  background: white;
+  border-radius: 14px;
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.preview-modal-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.preview-close-btn:hover {
+  color: #333;
+}
+
+.preview-loading,
+.preview-error {
+  padding: 3rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #666;
+}
+
+.preview-error {
+  color: #c33;
+}
+
+.preview-images {
+  display: flex;
+  gap: 0;
+  padding: 1.25rem;
+  align-items: flex-start;
+}
+
+.preview-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.preview-col-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.preview-img {
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background: #f8f8f8;
+}
+
+.preview-divider {
+  width: 2px;
+  align-self: stretch;
+  background: #f0f0f0;
+  margin: 0 1rem;
+  flex-shrink: 0;
 }

@@ -4,6 +4,7 @@ import config
 from api.upload import upload_bp
 from api.frame import frame_bp
 from api.export import export_bp
+from api.image_processor import image_bp
 
 # 创建Flask应用
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
 app.register_blueprint(upload_bp, url_prefix=config.API_PREFIX)
 app.register_blueprint(frame_bp, url_prefix=config.API_PREFIX)
 app.register_blueprint(export_bp, url_prefix=config.API_PREFIX)
+app.register_blueprint(image_bp, url_prefix=config.API_PREFIX)
 
 
 # 根路由
