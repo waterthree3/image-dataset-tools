@@ -5,12 +5,13 @@
 ## 功能特性
 
 ### 视频拆解
-- 📹 **视频上传**：支持 MP4, AVI, MOV, MKV 格式，最大 500MB
-- 🎞️ **帧提取**：自定义提取帧率（0.1 FPS ~ 视频原始帧率），精确控制提取密度
-- 🖼️ **可视化浏览**：网格视图展示所有帧，支持缩略图懒加载
-- ✅ **灵活选择**：单选、多选、全选帧
-- 💾 **格式导出**：支持 PNG 和 JPEG 格式，可调节 JPEG 质量
-- 📝 **智能命名**：自动使用视频文件名或自定义前缀，多视频处理无需手动改名
+- 📹 **视频上传**：支持 MP4, AVI, MOV, MKV 格式，**无文件大小限制**
+- 🎛️ **时间轴截帧**：拖动滑块实时预览任意时间点的画面，精确到毫秒
+- ⌨️ **键盘快捷键**：按住 `A` 逐帧后退，按住 `D` 逐帧前进；单次按下跳一帧，持续按住连续步进
+- ⏩ **快速导航**：±10 秒跳转按钮 + 逐帧步进按钮
+- 🖼️ **帧选取列表**：可添加多个时间点，自动按时序排列，支持点击跳转、移除
+- 💾 **格式导出**：支持 PNG 和 JPEG 格式，可调节 JPEG 质量（全分辨率导出）
+- 📝 **智能命名**：自动使用视频文件名作为前缀，支持自定义
 - 📦 **批量下载**：自动打包成 ZIP 文件下载
 
 ### 图片批量处理
@@ -48,7 +49,7 @@ video_split/
 │   ├── requirements.txt           # Python 依赖
 │   ├── api/
 │   │   ├── upload.py              # 视频上传 API
-│   │   ├── frame.py               # 视频帧 API
+│   │   ├── frame.py               # 视频帧 API（含时间轴取帧）
 │   │   ├── export.py              # 视频帧导出 API
 │   │   └── image_processor.py    # 图片批处理 API
 │   ├── services/
@@ -56,20 +57,18 @@ video_split/
 │   │   └── image_batch_service.py # 图片批处理逻辑
 │   └── storage/                   # 存储目录（自动创建）
 │       ├── uploads/               # 上传的视频
-│       ├── frames/                # 提取的视频帧
+│       ├── frames/                # 提取的视频帧缓存
 │       ├── exports/               # 视频帧导出 ZIP
 │       ├── image_batches/         # 上传的图片批次
 │       └── image_exports/         # 图片处理导出 ZIP
 ├── frontend/                       # React 前端
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── VideoUploader.jsx  # 视频上传 & 帧提取
-│   │   │   ├── FrameViewer.jsx    # 视频帧浏览
-│   │   │   ├── ExportPanel.jsx    # 视频帧导出
+│   │   │   ├── VideoUploader.jsx  # 视频上传组件
+│   │   │   ├── VideoTimeline.jsx  # 时间轴截帧组件
 │   │   │   ├── ImageBatchProcessor.jsx  # 图片批处理主组件
 │   │   │   └── ImageProcessSettings.jsx # 图片处理设置面板
 │   │   ├── services/api.js        # API 调用封装
-│   │   ├── hooks/                 # 自定义 Hooks
 │   │   └── styles/App.css         # 全局样式
 │   └── package.json
 └── README.md
@@ -116,12 +115,11 @@ npm run dev
 打开浏览器访问 http://localhost:5173，顶部 Tab 切换两个功能模块：
 
 **视频拆解：**
-1. 上传视频文件（支持拖放）
-2. 选择提取帧率（快捷选项：0.5/1/2/5 FPS 或最大帧率）
-3. 等待视频帧提取完成
-4. 在网格视图中浏览和选择需要的帧
-5. 自定义文件命名前缀（默认使用视频文件名）
-6. 选择导出格式（PNG/JPEG）和质量，点击"导出并下载"获取 ZIP
+1. 上传视频文件（支持拖放，无大小限制）
+2. 拖动时间轴滑块或按住 `A`/`D` 键逐帧导航，预览画面实时刷新
+3. 找到目标画面后点击「+ 添加此帧」，可添加多个时间点
+4. 在导出面板中选择格式（PNG/JPEG）、质量、文件名前缀
+5. 点击「导出并下载 ZIP」获取全分辨率帧图像
 
 **图片处理：**
 1. 点击「选择文件夹」或「选择图片」导入图片
@@ -167,7 +165,7 @@ Response: application/zip
 
 ### 视频 API
 
-### 上传视频
+#### 上传视频
 ```
 POST /api/upload
 Content-Type: multipart/form-data
@@ -177,61 +175,40 @@ Response: {
   "video_id": "uuid",
   "filename": "video.mp4",
   "duration": 120.5,
+  "duration_formatted": "2:00.500",
   "total_frames": 3600,
-  "fps": 30
+  "fps": 30,
+  "width": 1920,
+  "height": 1080
 }
 ```
 
-### 提取帧
+#### 时间轴预览取帧
 ```
-POST /api/videos/{video_id}/extract
-Body: { "fps": 1 }  // 支持 0.1 ~ 视频原始帧率
+GET /api/videos/{video_id}/frame_at?time=12.345
 
-Response: {
-  "video_id": "uuid",
-  "total_frames": 120,
-  "status": "completed"
-}
+Response: image/jpeg（960px 宽度预览，无需预先提取）
 ```
 
-### 获取帧列表
+#### 按时间戳导出帧
 ```
-GET /api/videos/{video_id}/frames?page=1&limit=50
-
-Response: {
-  "frames": [...],
-  "total": 120,
-  "page": 1,
-  "limit": 50
-}
-```
-
-### 获取单帧图像
-```
-GET /api/videos/{video_id}/frames/{frame_index}?thumbnail=true
-
-Response: image/jpeg
-```
-
-### 导出帧
-```
-POST /api/videos/{video_id}/export
+POST /api/videos/{video_id}/export_at
 Body: {
-  "frames": [0, 1, 2],
-  "format": "jpeg",
-  "quality": 85,
-  "prefix": "my_video"  // 可选，自定义文件名前缀
+  "timestamps": [1.0, 5.5, 12.3],   // 时间点列表（秒）
+  "format": "jpeg",                   // "jpeg" | "png"
+  "quality": 85,                      // JPEG 质量 1–100
+  "prefix": "my_video"                // 可选，自定义文件名前缀
 }
 
 Response: {
   "export_id": "uuid",
   "file_count": 3,
   "download_url": "/api/exports/{export_id}/download",
-  "zip_filename": "my_video_frames.zip"
+  "format": "jpeg"
 }
 ```
 
-### 下载导出文件
+#### 下载导出文件
 ```
 GET /api/exports/{export_id}/download
 
@@ -243,9 +220,8 @@ Response: application/zip
 ### backend/config.py
 
 主要配置项：
-- `MAX_VIDEO_SIZE`: 最大视频文件大小（默认 500MB）
+- `MAX_VIDEO_SIZE`: 最大视频文件大小（`None` = 不限制，默认无限制）
 - `ALLOWED_EXTENSIONS`: 允许的视频格式
-- `DEFAULT_FPS`: 默认提取帧率（默认每秒1帧）
 - `THUMBNAIL_SIZE`: 缩略图尺寸（默认 160×90）
 - `FRAME_QUALITY`: 帧图像质量（默认 85）
 - `ALLOWED_IMAGE_EXTENSIONS`: 图片批处理支持格式（JPG/PNG/BMP/WebP/GIF/TIFF）
@@ -253,15 +229,15 @@ Response: application/zip
 ## 性能优化
 
 ### 后端优化
-- **流式处理**: OpenCV逐帧读取，避免内存溢出
-- **缩略图生成**: 列表使用小尺寸缩略图，加快加载
-- **垃圾回收**: 每100帧执行一次内存清理
-- **HTTP缓存**: 设置缓存头减少重复请求
+- **按需取帧**: 时间轴模式无需预先批量提取，按请求实时解码
+- **预览缩放**: 预览帧缩放至 960px 宽，降低传输量；导出时使用全分辨率
+- **HTTP缓存**: 静态帧设置缓存头，预览帧禁用缓存确保实时性
 
 ### 前端优化
-- **懒加载**: 使用 Intersection Observer 实现图像懒加载
-- **Set数据结构**: O(1)时间复杂度的选择状态查询
-- **代理配置**: Vite开发服务器代理API请求
+- **fetch + ObjectURL**: 预览使用 `fetch()` 获取 Blob 再转 ObjectURL，避免 `<img src>` 并发请求堆积问题
+- **请求队列**: 持续按键时只保留最新待取帧，上一请求完成后立即取最新帧，不堆积并行请求
+- **防抖60ms**: 滑块拖动时合并高频事件，避免短时间内发出过多请求
+- **内存管理**: 每次更新前 `revokeObjectURL` 释放旧 Blob，防止内存泄漏
 
 ## 常见问题
 
@@ -269,19 +245,16 @@ Response: application/zip
 A: 支持 MP4 (H.264), AVI, MOV, MKV 格式。
 
 ### Q: 视频文件大小限制是多少？
-A: 默认最大 500MB，可在 config.py 中修改。
+A: 无限制。可在 `config.py` 中通过 `MAX_VIDEO_SIZE` 按需设置上限（单位字节）。
 
-### Q: 提取所有帧需要多长时间？
-A: 取决于视频时长和分辨率。默认每秒提取1帧，一个10分钟的视频大约需要1-2分钟。
+### Q: 预览帧和导出帧的分辨率一样吗？
+A: 不一样。预览帧缩放至最大 960px 宽以加快响应；导出帧使用视频原始全分辨率。
 
 ### Q: 导出的图像保存在哪里？
-A: 后端临时存储在 backend/storage/exports/，下载后会自动清理。
-
-### Q: 如何提取更多或更少的帧？
-A: 上传视频后，在帧率选择界面中自定义 FPS 值（0.1 ~ 视频原始帧率），或使用快捷按钮。
+A: 后端临时存储在 `backend/storage/exports/`，下载后可手动清理。
 
 ### Q: 导出的文件名可以自定义吗？
-A: 可以。导出时默认使用视频文件名作为前缀，你也可以在导出面板中修改为任意自定义名称。导出的图片格式为 `{前缀}_0001.jpg`。
+A: 可以。导出时默认使用视频文件名作为前缀，可在导出面板中修改。导出的图片格式为 `{前缀}_0001.jpg`。
 
 ## 开发说明
 
@@ -320,6 +293,33 @@ MIT License
 欢迎提交 Issue 和 Pull Request！
 
 ## 更新日志
+
+### 2026-03-01 - 时间轴截帧模式 + 键盘快捷键 + 预览实时刷新
+
+**新增功能:**
+- **时间轴截帧**：将视频拆解从"设置帧率批量提取"改为"拖动时间轴截取任意帧"——上传后直接进入时间轴界面，拖动滑块实时预览任意时间点画面
+- **键盘快捷键**：按住 `A` 逐帧后退，按住 `D` 逐帧前进；单次按下跳一帧，按住 350ms 后进入连续步进模式（~12fps）；在文本输入框中输入时自动屏蔽快捷键
+- **±10s 快速跳转**：导航栏新增 ⏪10s / 10s⏩ 按钮
+- **帧选取列表**：添加的帧按时序排列，点击缩略图可跳转到对应时间点
+- **无文件大小限制**：移除 500MB 上传上限
+
+**改进:**
+- 预览使用 `fetch() + ObjectURL` 方案替代 `<img src>` 直接赋值，解决持续按键时因并发请求堆积导致画面不更新的问题
+- 导出使用全分辨率帧（原视频尺寸），预览使用 960px 缩放图加快响应
+
+**受影响文件:**
+- `backend/config.py` — `MAX_VIDEO_SIZE = None`（无限制）
+- `backend/app.py` — 条件设置 `MAX_CONTENT_LENGTH`
+- `backend/api/frame.py` — 新增 `GET /videos/<id>/frame_at?time=<秒>` 端点
+- `backend/api/export.py` — 新增 `POST /videos/<id>/export_at` 端点（按时间戳列表导出）
+- `backend/services/video_processor.py` — 新增 `get_frame_at_time()` 静态方法
+- `frontend/src/components/VideoUploader.jsx` — 简化：移除 FPS 选择步骤，无大小限制
+- `frontend/src/components/VideoTimeline.jsx` — 新建：时间轴截帧主界面
+- `frontend/src/App.jsx` — 上传后直接显示 VideoTimeline，移除旧 FrameViewer/ExportPanel 流程
+- `frontend/src/services/api.js` — 新增 `exportFramesByTimestamps()` 方法
+- `frontend/src/styles/App.css` — 新增时间轴相关样式
+
+---
 
 ### 2026-02-23 - 图片批处理：预览与手动裁切位置
 
@@ -376,16 +376,8 @@ MIT License
 - 自定义命名 - 支持手动修改导出文件的命名前缀
 - 文件名预览 - 实时预览导出后的文件命名格式
 
-**改进:**
-- 前端：视频上传后展示帧率选择界面，而非立即提取
-- 前端：导出面板新增命名配置选项，支持切换和编辑
-- 后端：export API 支持 prefix 参数
-- 后端：自动清理文件名中的不安全字符
-- 后端：ZIP 文件名使用自定义前缀，便于区分不同视频
-
 **受影响文件:**
 - `frontend/src/components/VideoUploader.jsx` - 帧率选择界面
-- `frontend/src/components/ExportPanel.jsx` - 命名配置功能
 - `frontend/src/services/api.js` - API 更新支持 prefix
 - `frontend/src/styles/App.css` - 新增界面样式
 - `backend/api/export.py` - 文件命名逻辑
@@ -399,29 +391,9 @@ MIT License
 - 解决了 FFmpeg swscaler 参数错误导致的黑屏问题
 - 改进了视频编码兼容性检测和诊断
 
-**新增功能:**
-- 添加视频修复工具 `fix_video.py` - 用于重新编码有问题的视频
-- 添加便捷批处理脚本 `fix_video.bat`
-- 添加视频修复指南 `VIDEO_FIX_GUIDE.md`
-
-**改进:**
-- 所有批处理文件（`debug_video.bat`, `fix_video.bat`）改为纯英文，避免编码问题
-- `debug_video.py` 国际化，移除中文输出
-- 增强错误诊断：检测到黑屏帧时自动提示解决方案
-- 改进视频处理器错误提示，指导用户使用修复工具
-
-**技术细节:**
-- 视频修复使用 libx264 编码器和 yuv420p 像素格式确保最大兼容性
-- CRF 18 质量设置保证视觉无损
-- 添加 `CAP_PROP_CONVERT_RGB` 属性帮助处理问题视频
-
 **受影响文件:**
-- `debug_video.bat` - 移除中文，改为英文
-- `backend/debug_video.py` - 国际化更新
 - `backend/services/video_processor.py` - 增强错误处理
 - `backend/fix_video.py` - 新增视频修复工具
-- `fix_video.bat` - 新增批处理脚本
-- `VIDEO_FIX_GUIDE.md` - 新增修复指南文档
 
 ---
 

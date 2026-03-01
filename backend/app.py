@@ -18,8 +18,9 @@ CORS(app, resources={
     }
 })
 
-# 配置
-app.config['MAX_CONTENT_LENGTH'] = config.MAX_VIDEO_SIZE
+# 配置（MAX_VIDEO_SIZE=None 表示不限制上传大小）
+if config.MAX_VIDEO_SIZE is not None:
+    app.config['MAX_CONTENT_LENGTH'] = config.MAX_VIDEO_SIZE
 app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
 
 # 注册蓝图
@@ -52,10 +53,7 @@ def index():
 @app.errorhandler(413)
 def file_too_large(e):
     """处理文件过大错误"""
-    max_size_mb = config.MAX_VIDEO_SIZE / (1024 * 1024)
-    return jsonify({
-        'error': f'File too large. Maximum size is {max_size_mb:.0f}MB'
-    }), 413
+    return jsonify({'error': 'File too large'}), 413
 
 
 @app.errorhandler(404)
@@ -83,7 +81,8 @@ if __name__ == '__main__':
     print('=' * 60)
     print(f'服务器地址: http://localhost:5000')
     print(f'API文档: http://localhost:5000/')
-    print(f'最大上传大小: {config.MAX_VIDEO_SIZE / (1024 * 1024):.0f}MB')
+    size_str = f"{config.MAX_VIDEO_SIZE / (1024 * 1024):.0f}MB" if config.MAX_VIDEO_SIZE else "无限制"
+    print(f'最大上传大小: {size_str}')
     print(f'支持格式: {", ".join(config.ALLOWED_EXTENSIONS)}')
     print('=' * 60)
 

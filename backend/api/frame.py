@@ -1,5 +1,7 @@
 import os
-from flask import Blueprint, request, jsonify, send_file
+import io
+from flask import Blueprint, request, jsonify, send_file, Response
+import cv2
 import config
 from services.video_processor import VideoProcessor
 from services.frame_manager import FrameManager
@@ -141,6 +143,47 @@ def get_frame(video_id, frame_index):
 
     except Exception as e:
         return jsonify({'error': f'Failed to get frame: {str(e)}'}), 500
+
+
+@frame_bp.route('/videos/<video_id>/frame_at', methods=['GET'])
+def get_frame_at_time(video_id):
+    """
+    按时间戳实时取帧（用于时间轴预览，无需预先提取）
+
+    Query Parameters:
+        time: 时间（秒，浮点数）
+
+    Returns:
+        JPEG图像
+    """
+    try:
+        time_seconds = request.args.get('time', 0, type=float)
+
+        # 查找视频文件
+        video_path = None
+        for ext in config.ALLOWED_EXTENSIONS:
+            path = os.path.join(config.UPLOAD_FOLDER, f"{video_id}.{ext}")
+            if os.path.exists(path):
+                video_path = path
+                break
+
+        if not video_path:
+            return jsonify({'error': 'Video not found'}), 404
+
+        frame = VideoProcessor.get_frame_at_time(video_path, time_seconds)
+
+        # 编码为JPEG并返回
+        _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 82])
+        byte_io = io.BytesIO(buffer.tobytes())
+
+        response = send_file(byte_io, mimetype='image/jpeg')
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+
+    except FileNotFoundError:
+        return jsonify({'error': 'Video not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @frame_bp.route('/videos/<video_id>/info', methods=['GET'])

@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import VideoUploader from './components/VideoUploader';
-import FrameViewer from './components/FrameViewer';
-import ExportPanel from './components/ExportPanel';
+import VideoTimeline from './components/VideoTimeline';
 import ImageBatchProcessor from './components/ImageBatchProcessor';
-import { useFrameSelection } from './hooks/useFrameSelection';
 import './styles/App.css';
 
 /**
@@ -11,24 +9,14 @@ import './styles/App.css';
  */
 function App() {
   const [activeTab, setActiveTab] = useState('video'); // 'video' | 'image'
-  const [currentVideoId, setCurrentVideoId] = useState(null);
-  const [videoData, setVideoData] = useState(null);
-
-  const {
-    selectedFrames,
-    selectedCount,
-    toggleFrame,
-    selectAll,
-    clearSelection,
-  } = useFrameSelection();
+  const [videoData, setVideoData] = useState(null);    // 上传完成后的视频信息
 
   const handleUploadComplete = (data) => {
     setVideoData(data);
   };
 
-  const handleExtractionComplete = (videoId) => {
-    setCurrentVideoId(videoId);
-    clearSelection();
+  const handleReset = () => {
+    setVideoData(null);
   };
 
   return (
@@ -37,7 +25,6 @@ function App() {
         <h1>🎬 视频/图片处理工具</h1>
         <p>视频帧提取 · 图片批量裁切缩放</p>
 
-        {/* Tab navigation */}
         <nav className="tab-nav">
           <button
             className={`tab-btn ${activeTab === 'video' ? 'active' : ''}`}
@@ -56,45 +43,25 @@ function App() {
 
       <main className="app-main">
 
-        {/* ── Video tab ──────────────────────────────────────── */}
+        {/* ── 视频标签页 ──────────────────────────────────────── */}
         {activeTab === 'video' && (
           <>
-            <section className="upload-section">
-              <VideoUploader
-                onUploadComplete={handleUploadComplete}
-                onExtractionComplete={handleExtractionComplete}
-              />
-            </section>
-
-            {currentVideoId && (
-              <div className="content-layout">
-                <section className="viewer-section">
-                  <FrameViewer
-                    videoId={currentVideoId}
-                    selectedFrames={selectedFrames}
-                    onToggleFrame={toggleFrame}
-                    onSelectAll={selectAll}
-                    onClearSelection={clearSelection}
-                  />
-                </section>
-                <aside className="export-section">
-                  <ExportPanel
-                    videoId={currentVideoId}
-                    selectedFrames={selectedFrames}
-                  />
-                </aside>
-              </div>
-            )}
-
-            {!currentVideoId && (
-              <div className="empty-state">
-                <p>👆 请先上传视频文件以开始使用</p>
-              </div>
+            {!videoData ? (
+              <section className="upload-section">
+                <VideoUploader onUploadComplete={handleUploadComplete} />
+                <div className="empty-state">
+                  <p>👆 上传视频后，通过时间轴拖动截取任意帧</p>
+                </div>
+              </section>
+            ) : (
+              <section className="timeline-section">
+                <VideoTimeline videoData={videoData} onReset={handleReset} />
+              </section>
             )}
           </>
         )}
 
-        {/* ── Image tab ──────────────────────────────────────── */}
+        {/* ── 图片标签页 ──────────────────────────────────────── */}
         {activeTab === 'image' && (
           <ImageBatchProcessor />
         )}
@@ -102,7 +69,7 @@ function App() {
 
       <footer className="app-footer">
         {activeTab === 'video'
-          ? '使用提示：上传视频 → 浏览帧 → 选择需要的帧 → 导出下载'
+          ? '使用提示：上传视频 → 拖动时间轴 → 添加此帧 → 导出下载'
           : '使用提示：选择文件夹 → 选中图片 → 配置处理方式 → 处理并下载 ZIP'}
       </footer>
     </div>

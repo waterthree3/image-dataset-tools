@@ -10,7 +10,7 @@ FRAME_FOLDER = os.path.join(STORAGE_DIR, 'frames')
 EXPORT_FOLDER = os.path.join(STORAGE_DIR, 'exports')
 
 # 文件限制
-MAX_VIDEO_SIZE = 500 * 1024 * 1024  # 500MB
+MAX_VIDEO_SIZE = None  # 无限制（None = 不设置 Flask MAX_CONTENT_LENGTH）
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}
 
 # 帧处理配置

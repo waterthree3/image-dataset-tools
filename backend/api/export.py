@@ -7,6 +7,7 @@ from PIL import Image
 import cv2
 import config
 from services.frame_manager import FrameManager
+from services.video_processor import VideoProcessor
 
 export_bp = Blueprint('export', __name__)
 frame_manager = FrameManager(config.FRAME_FOLDER)
@@ -123,6 +124,103 @@ def export_frames(video_id):
         if 'export_dir' in locals() and os.path.exists(export_dir):
             shutil.rmtree(export_dir, ignore_errors=True)
 
+        return jsonify({'error': f'Export failed: {str(e)}'}), 500
+
+
+@export_bp.route('/videos/<video_id>/export_at', methods=['POST'])
+def export_frames_at_timestamps(video_id):
+    """
+    按时间戳导出帧（时间轴模式，无需预先批量提取）
+
+    Request Body:
+        timestamps: 时间戳列表（秒）[0.5, 2.1, 10.33, ...]
+        format: 'png' 或 'jpeg'
+        quality: JPEG质量（1-100）
+        prefix: 文件名前缀
+
+    Returns:
+        JSON响应，包含导出ID和下载信息
+    """
+    try:
+        data = request.get_json()
+        if not data or 'timestamps' not in data:
+            return jsonify({'error': 'Missing timestamps parameter'}), 400
+
+        timestamps = data.get('timestamps', [])
+        export_format = data.get('format', 'jpeg').lower()
+        quality = data.get('quality', 85)
+        prefix = data.get('prefix', 'frame')
+
+        if not timestamps:
+            return jsonify({'error': 'No timestamps provided'}), 400
+
+        if export_format not in ['png', 'jpeg', 'jpg']:
+            return jsonify({'error': 'Invalid format. Use "png" or "jpeg"'}), 400
+
+        # 清理前缀
+        prefix = ''.join(c for c in prefix if c.isalnum() or c in ['_', '-', ' '])
+        prefix = prefix.strip().replace(' ', '_') or 'frame'
+
+        # 查找视频文件
+        video_path = None
+        for ext in config.ALLOWED_EXTENSIONS:
+            path = os.path.join(config.UPLOAD_FOLDER, f"{video_id}.{ext}")
+            if os.path.exists(path):
+                video_path = path
+                break
+
+        if not video_path:
+            return jsonify({'error': 'Video not found'}), 404
+
+        export_id = str(uuid.uuid4())
+        export_dir = os.path.join(config.EXPORT_FOLDER, export_id)
+        os.makedirs(export_dir, exist_ok=True)
+
+        exported_count = 0
+        for i, t in enumerate(timestamps):
+            try:
+                # 全分辨率帧（不缩放）
+                frame = VideoProcessor.get_frame_at_time(video_path, float(t), max_width=99999)
+
+                if export_format == 'png':
+                    output_filename = f'{prefix}_{i:04d}.png'
+                    output_path = os.path.join(export_dir, output_filename)
+                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    img = Image.fromarray(frame_rgb)
+                    img.save(output_path, 'PNG')
+                else:
+                    output_filename = f'{prefix}_{i:04d}.jpg'
+                    output_path = os.path.join(export_dir, output_filename)
+                    cv2.imwrite(output_path, frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
+
+                exported_count += 1
+            except Exception as e:
+                print(f"Error exporting frame at {t}s: {e}")
+
+        if exported_count == 0:
+            shutil.rmtree(export_dir, ignore_errors=True)
+            return jsonify({'error': 'No frames were exported'}), 400
+
+        zip_filename = f'{export_id}_{prefix}_frames.zip'
+        zip_path = os.path.join(config.EXPORT_FOLDER, zip_filename)
+
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for filename in os.listdir(export_dir):
+                zipf.write(os.path.join(export_dir, filename), filename)
+
+        shutil.rmtree(export_dir)
+
+        return jsonify({
+            'export_id': export_id,
+            'file_count': exported_count,
+            'download_url': f'/api/exports/{export_id}/download',
+            'format': export_format,
+            'zip_filename': zip_filename
+        }), 200
+
+    except Exception as e:
+        if 'export_dir' in locals() and os.path.exists(export_dir):
+            shutil.rmtree(export_dir, ignore_errors=True)
         return jsonify({'error': f'Export failed: {str(e)}'}), 500
 
 

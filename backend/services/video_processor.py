@@ -217,6 +217,55 @@ class VideoProcessor:
             raise
 
     @staticmethod
+    def get_frame_at_time(video_path, time_seconds, max_width=960):
+        """
+        获取指定时间点的帧，并缩放到预览尺寸
+
+        Args:
+            video_path: 视频文件路径
+            time_seconds: 时间（秒）
+            max_width: 预览最大宽度（默认960px）
+
+        Returns:
+            numpy.ndarray: 帧图像数据（BGR）
+        """
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Video file not found: {video_path}")
+
+        cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+        if not cap.isOpened():
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                raise ValueError(f"Cannot open video file: {video_path}")
+
+        try:
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            frame_index = int(time_seconds * fps)
+            frame_index = max(0, min(frame_index, total_frames - 1))
+
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+            ret, frame = cap.read()
+
+            if not ret or frame is None or frame.size == 0:
+                raise ValueError(f"Cannot read frame at {time_seconds}s")
+
+            # 缩放到预览尺寸
+            if width > max_width:
+                scale = max_width / width
+                new_w = max_width
+                new_h = int(height * scale)
+                frame = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+            return frame
+
+        finally:
+            cap.release()
+
+    @staticmethod
     def get_frame_at_index(video_path, frame_index):
         """
         获取指定索引的帧

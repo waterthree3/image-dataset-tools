@@ -1311,3 +1311,396 @@ body {
   margin: 0 1rem;
   flex-shrink: 0;
 }
+
+/* ================================================================
+   Video Timeline（时间轴截帧）
+   ================================================================ */
+.timeline-section {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.video-timeline {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* 顶部标题栏 */
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.timeline-filename {
+  font-size: 1.25rem;
+  color: #333;
+  margin: 0 0 0.25rem;
+  word-break: break-all;
+}
+
+.timeline-meta {
+  font-size: 0.88rem;
+  color: #888;
+  margin: 0;
+}
+
+.timeline-reset-btn {
+  flex-shrink: 0;
+  padding: 0.4rem 0.9rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.timeline-reset-btn:hover {
+  background: #f0f2ff;
+}
+
+/* 帧预览区域 */
+.timeline-preview-area {
+  position: relative;
+  background: #111;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.timeline-preview-img {
+  max-width: 100%;
+  max-height: 480px;
+  display: block;
+  border-radius: 10px;
+  transition: opacity 0.15s;
+}
+
+.timeline-preview-img.tl-loading {
+  opacity: 0.5;
+}
+
+.timeline-preview-placeholder {
+  color: #aaa;
+  font-size: 1rem;
+  padding: 3rem;
+}
+
+/* 当前时间浮标 */
+.preview-time-badge {
+  position: absolute;
+  bottom: 0.6rem;
+  right: 0.8rem;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 0.82rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+/* 时间轴控制区 */
+.timeline-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timeline-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tl-btn {
+  padding: 0.4rem 0.8rem;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tl-btn:hover {
+  background: #e8ebff;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tl-time-display {
+  flex: 1;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: 0.92rem;
+  color: #555;
+  min-width: 160px;
+}
+
+/* 键盘快捷键提示 */
+.tl-key-hint {
+  font-size: 0.8rem;
+  color: #aaa;
+  text-align: center;
+  margin: 0;
+}
+
+.tl-key-hint kbd {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-bottom: 2px solid #bbb;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  color: #444;
+  font-weight: 600;
+}
+
+/* 滑块 */
+.timeline-slider {
+  width: 100%;
+  height: 6px;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+}
+
+/* 添加帧按钮 */
+.add-frame-btn {
+  align-self: center;
+  padding: 0.6rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.add-frame-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.45);
+}
+
+/* 已选帧面板 */
+.selected-frames-panel {
+  border: 2px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.selected-frames-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.selected-frames-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.tl-clear-btn {
+  padding: 0.25rem 0.7rem;
+  background: white;
+  color: #c33;
+  border: 2px solid #e0a0a0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.2s;
+}
+
+.tl-clear-btn:hover {
+  background: #fee;
+  border-color: #c33;
+}
+
+.tl-empty-hint {
+  color: #aaa;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 1.5rem 0;
+  margin: 0;
+}
+
+/* 已选帧横向滚动条 */
+.selected-frames-strip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.selected-frames-strip::-webkit-scrollbar { height: 5px; }
+.selected-frames-strip::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.selected-frames-strip::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+
+.selected-frame-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 120px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  transition: border-color 0.2s;
+}
+
+.selected-frame-item img {
+  width: 100%;
+  height: 70px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.selected-frame-item img:hover {
+  opacity: 0.85;
+}
+
+.frame-time-label {
+  display: block;
+  font-size: 0.68rem;
+  font-family: 'Courier New', monospace;
+  color: #555;
+  text-align: center;
+  padding: 0.2rem 0.3rem;
+  background: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-frame-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.remove-frame-btn:hover {
+  background: rgba(200, 0, 0, 0.75);
+}
+
+/* 导出面板 */
+.timeline-export-panel {
+  border: 2px solid #e8ebff;
+  border-radius: 10px;
+  padding: 1rem;
+  background: #f8f9ff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tl-export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tl-export-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tl-export-row label:first-child {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #555;
+  white-space: nowrap;
+}
+
+.tl-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.88rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.tl-quality-slider {
+  flex: 1;
+  accent-color: #667eea;
+  min-width: 100px;
+}
+
+.tl-prefix-input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  min-width: 120px;
+  transition: border-color 0.2s;
+}
+
+.tl-prefix-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.tl-export-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.tl-export-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(17, 153, 142, 0.4);
+}
+
+.tl-export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

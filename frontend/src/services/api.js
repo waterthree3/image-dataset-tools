@@ -126,6 +126,21 @@ export const api = {
   },
 
   /**
+   * 按时间戳导出帧（时间轴模式）
+   * @param {string} videoId - 视频ID
+   * @param {number[]} timestamps - 时间戳列表（秒）
+   * @param {string} format - 'jpeg' 或 'png'
+   * @param {number} quality - JPEG质量 (1-100)
+   * @param {string} prefix - 文件名前缀
+   * @returns {Promise}
+   */
+  exportFramesByTimestamps: (videoId, timestamps, format = 'jpeg', quality = 85, prefix = null) => {
+    const payload = { timestamps, format, quality };
+    if (prefix) payload.prefix = prefix;
+    return apiClient.post(`/videos/${videoId}/export_at`, payload);
+  },
+
+  /**
    * 获取视频列表
    * @returns {Promise}
    */
