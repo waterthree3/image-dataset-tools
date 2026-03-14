@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
 import { api } from '../services/api';
+import { useLang } from '../LangContext';
 
 /**
  * 视频上传组件（简化版：仅上传，不包含帧率提取步骤）
  */
 export const VideoUploader = ({ onUploadComplete }) => {
+  const { t } = useLang();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -14,11 +16,13 @@ export const VideoUploader = ({ onUploadComplete }) => {
   const handleFileSelect = async (file) => {
     if (!file) return;
 
-    // 验证文件格式（通过扩展名，兼容不同浏览器的MIME类型差异）
     const allowedExtensions = ['mp4', 'avi', 'mov', 'mkv'];
     const ext = file.name.split('.').pop().toLowerCase();
     if (!allowedExtensions.includes(ext)) {
-      setError('不支持的文件格式。请上传 MP4、AVI、MOV 或 MKV 文件。');
+      setError(t(
+        '不支持的文件格式。请上传 MP4、AVI、MOV 或 MKV 文件。',
+        'Unsupported format. Please upload an MP4, AVI, MOV or MKV file.'
+      ));
       return;
     }
 
@@ -38,15 +42,14 @@ export const VideoUploader = ({ onUploadComplete }) => {
       }
 
     } catch (err) {
-      console.error('上传失败:', err);
-      setError(err.response?.data?.error || '上传失败，请重试');
+      console.error('Upload failed:', err);
+      setError(err.response?.data?.error || t('上传失败，请重试', 'Upload failed, please retry'));
       setUploading(false);
     }
   };
 
   const handleFileInputChange = (e) => {
     handleFileSelect(e.target.files[0]);
-    // 允许重复选同一文件
     e.target.value = '';
   };
 
@@ -92,16 +95,16 @@ export const VideoUploader = ({ onUploadComplete }) => {
         {!uploading && (
           <>
             <div className="upload-icon">📹</div>
-            <h3>上传视频文件</h3>
-            <p>点击或拖放视频文件到此区域</p>
-            <p className="upload-hint">支持 MP4、AVI、MOV、MKV 格式，无文件大小限制</p>
+            <h3>{t('上传视频文件', 'Upload Video File')}</h3>
+            <p>{t('点击或拖放视频文件到此区域', 'Click or drag a video file here')}</p>
+            <p className="upload-hint">{t('支持 MP4、AVI、MOV、MKV 格式，无文件大小限制', 'MP4 · AVI · MOV · MKV · No size limit')}</p>
           </>
         )}
 
         {uploading && (
           <>
             <div className="upload-icon">⬆️</div>
-            <h3>上传中...</h3>
+            <h3>{t('上传中...', 'Uploading...')}</h3>
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${uploadProgress}%` }}></div>
             </div>

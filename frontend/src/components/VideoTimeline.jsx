@@ -19,13 +19,13 @@ const formatTime = (seconds) => {
  * 最后按时间戳一次性导出ZIP。
  * 包含 AI 智能拆解面板，支持 OpenAI 兼容 / Anthropic API 配置。
  */
-export const VideoTimeline = ({ videoData, onReset }) => {
+export const VideoTimeline = ({ videoData, onReset, initialFrames, onBack }) => {
   const { lang, t } = useLang();
   const { video_id, duration, fps, width, height, filename, duration_formatted } = videoData;
 
   const [currentTime, setCurrentTime] = useState(0);
   const [previewSrc, setPreviewSrc] = useState(null);
-  const [selectedFrames, setSelectedFrames] = useState([]); // [{time, thumbUrl}]
+  const [selectedFrames, setSelectedFrames] = useState(initialFrames || []); // [{time, thumbUrl}]
   const [exporting, setExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState('jpeg');
   const [exportQuality, setExportQuality] = useState(85);
@@ -243,9 +243,15 @@ export const VideoTimeline = ({ videoData, onReset }) => {
             {width} × {height} · {fps.toFixed(2)} FPS · {duration_formatted}
           </p>
         </div>
-        <button className="timeline-reset-btn" onClick={onReset}>
-          {t('换一个视频', 'Change Video')}
-        </button>
+        {onBack ? (
+          <button className="timeline-reset-btn" onClick={() => onBack(selectedFrames)}>
+            ← {t('返回列表', 'Back to List')}
+          </button>
+        ) : (
+          <button className="timeline-reset-btn" onClick={onReset}>
+            {t('换一个视频', 'Change Video')}
+          </button>
+        )}
       </div>
 
       {/* 帧预览区 */}

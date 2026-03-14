@@ -2208,3 +2208,232 @@ body {
 .ai-add-frame-btn:hover {
   background: #5568d3;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Video Home Screen — two-card layout
+══════════════════════════════════════════════════════════════ */
+.video-home-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .video-home-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.video-home-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Folder-select card mirrors the uploader but uses a folder icon */
+.folder-card .folder-select-area {
+  background: white;
+  border: 3px dashed #ccc;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-card .folder-select-area:hover {
+  border-color: #764ba2;
+  background: #f8f0ff;
+}
+
+.folder-card .folder-select-area h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.folder-card .folder-select-area p {
+  color: #666;
+  margin: 0.5rem 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Folder List View
+══════════════════════════════════════════════════════════════ */
+.folder-list-view {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.folder-list-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.folder-exit-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #555;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.folder-exit-btn:hover {
+  background: #f0f0f0;
+  border-color: #999;
+  color: #333;
+}
+
+.folder-list-title {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Grid of video cards */
+.folder-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.folder-video-card {
+  position: relative;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 120px;
+}
+
+.folder-video-card:hover:not(.uploading) {
+  border-color: #667eea;
+  background: #f0f2ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+}
+
+.folder-video-card.uploading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.folder-video-card.has-error {
+  border-color: #e74c3c;
+  background: #fff5f5;
+}
+
+.folder-video-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.folder-video-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.folder-video-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  word-break: break-all;
+  margin-bottom: 0.2rem;
+  /* Clamp to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.folder-video-size {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.folder-video-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+.folder-frame-badge {
+  background: #27ae60;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+}
+
+.folder-status-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+}
+
+.uploading-badge {
+  background: #f39c12;
+  color: white;
+}
+
+.error-badge {
+  background: #e74c3c;
+  color: white;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Folder uploading / error overlay in timeline section
+══════════════════════════════════════════════════════════════ */
+.folder-uploading-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  min-height: 300px;
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.folder-uploading-icon {
+  font-size: 4rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.folder-uploading-text {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: center;
+  max-width: 400px;
+  word-break: break-all;
+}
