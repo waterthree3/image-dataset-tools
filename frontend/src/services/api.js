@@ -236,6 +236,18 @@ export const api = {
   },
 
   /**
+   * 将已上传的图片无损转换为 PNG
+   * @param {string} batchId
+   * @param {Array<{image_id: string, original_filename: string}>} imageInfoList
+   * @returns {Promise}
+   */
+  convertImagesToPng: (batchId, imageInfoList) => {
+    return apiClient.post(`/images/batch/${batchId}/convert_to_png`, {
+      image_info: imageInfoList,
+    });
+  },
+
+  /**
    * 删除图片批次
    * @param {string} batchId
    * @returns {Promise}

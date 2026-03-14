@@ -31,6 +31,131 @@ function PreviewModal({ originalUrl, previewUrl, filename, onClose, loading, err
   );
 }
 
+/** WebP → PNG lossless converter — self-contained quick-tool section. */
+function WebpToPngConverter() {
+  const [webpFiles, setWebpFiles]   = useState([]);
+  const [status, setStatus]         = useState(null); // null|'uploading'|'converting'|'done'|'error'
+  const [progress, setProgress]     = useState({ current: 0, total: 0 });
+  const [message, setMessage]       = useState(null);
+  const [error, setError]           = useState(null);
+
+  const folderInputRef = useRef(null);
+  const fileInputRef   = useRef(null);
+
+  useEffect(() => {
+    if (folderInputRef.current) folderInputRef.current.setAttribute('webkitdirectory', '');
+  }, []);
+
+  const handleFiles = (files) => {
+    const webps = Array.from(files).filter(f => /\.(webp|avif)$/i.test(f.name));
+    setWebpFiles(webps);
+    setMessage(null);
+    setError(webps.length === 0 ? '所选文件中没有 WebP / AVIF 格式的图片' : null);
+  };
+
+  const handleConvert = async () => {
+    if (webpFiles.length === 0) return;
+    setStatus('uploading');
+    setError(null);
+    setMessage(null);
+    setProgress({ current: 0, total: webpFiles.length });
+
+    try {
+      const { data: { batch_id } } = await api.createImageBatch();
+
+      const CHUNK = 10;
+      const uploadedItems = [];
+
+      for (let i = 0; i < webpFiles.length; i += CHUNK) {
+        const chunk = webpFiles.slice(i, i + CHUNK);
+        const { data } = await api.uploadImages(batch_id, chunk);
+        uploadedItems.push(...(data.uploaded || []).filter(u => !u.error));
+        setProgress({ current: Math.min(i + CHUNK, webpFiles.length), total: webpFiles.length });
+      }
+
+      if (uploadedItems.length === 0) throw new Error('没有文件上传成功');
+
+      setStatus('converting');
+      const imageInfoList = uploadedItems.map(u => ({
+        image_id: u.image_id,
+        original_filename: u.filename,
+      }));
+
+      const { data } = await api.convertImagesToPng(batch_id, imageInfoList);
+
+      const blobResp = await api.downloadImageExport(data.export_id);
+      const url = URL.createObjectURL(blobResp.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'webp_to_png.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setStatus('done');
+      setMessage(`成功转换 ${data.processed_count} 个 WebP 文件，下载已开始`);
+    } catch (err) {
+      setStatus('error');
+      setError('转换失败：' + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const isRunning  = status === 'uploading' || status === 'converting';
+  const progressPct = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
+
+  return (
+    <div className="webp-converter-card">
+      <div className="webp-converter-header">
+        <span className="webp-converter-title">WebP / AVIF → PNG 无损转换</span>
+        <span className="webp-converter-desc">将文件夹中的所有 WebP / AVIF 文件无损转换为 PNG，打包下载</span>
+      </div>
+
+      <div className="webp-converter-body">
+        <div className="image-upload-buttons">
+          <button className="folder-select-btn" onClick={() => folderInputRef.current?.click()} disabled={isRunning}>
+            📁 选择文件夹
+          </button>
+          <button className="file-select-btn" onClick={() => fileInputRef.current?.click()} disabled={isRunning}>
+            🖼️ 选择 WebP / AVIF 文件
+          </button>
+        </div>
+
+        <input ref={folderInputRef} type="file" multiple accept=".webp,.avif" style={{ display: 'none' }}
+          onChange={e => { handleFiles(e.target.files); e.target.value = ''; }} />
+        <input ref={fileInputRef}   type="file" multiple accept=".webp,.avif" style={{ display: 'none' }}
+          onChange={e => { handleFiles(e.target.files); e.target.value = ''; }} />
+
+        {webpFiles.length > 0 && !error && (
+          <p className="webp-file-count">已选择 <strong>{webpFiles.length}</strong> 个 WebP / AVIF 文件</p>
+        )}
+
+        {error   && <div className="error-message">{error}</div>}
+        {message && !error && <div className="message success-message">{message}</div>}
+
+        {isRunning && (
+          <div className="upload-progress-info">
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+            </div>
+            <p>{status === 'uploading' ? `上传中… ${progress.current} / ${progress.total}` : '转换中…'}</p>
+          </div>
+        )}
+
+        <button
+          className="process-button webp-convert-btn"
+          onClick={handleConvert}
+          disabled={webpFiles.length === 0 || isRunning}
+        >
+          {isRunning
+            ? (status === 'converting' ? '转换中…' : '上传中…')
+            : `无损转换为 PNG 并下载（${webpFiles.length || 0} 个文件）`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'bmp', 'webp', 'gif', 'tiff', 'tif']);
 
 function getExt(name) {
@@ -269,6 +394,11 @@ function ImageBatchProcessor() {
 
   return (
     <div className="image-processor">
+      {/* ── WebP → PNG quick converter ────────────────────────── */}
+      <WebpToPngConverter />
+
+      <div className="section-divider" />
+
       {/* ── Preview modal ─────────────────────────────────────── */}
       {preview && (
         <PreviewModal

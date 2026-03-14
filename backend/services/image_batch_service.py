@@ -5,7 +5,7 @@ import zipfile
 import shutil
 from PIL import Image
 
-ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tif', 'gif'}
+ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'bmp', 'webp', 'avif', 'tiff', 'tif', 'gif'}
 
 
 class ImageBatchService:
@@ -344,6 +344,68 @@ class ImageBatchService:
             img.save(buf, 'JPEG', quality=82)
             buf.seek(0)
             return buf
+
+    def convert_to_png(self, batch_id, image_info_list):
+        """
+        Losslessly convert images to PNG (no resize, crop, or quality loss).
+
+        image_info_list: [{'image_id': str, 'original_filename': str}, ...]
+        Returns: {'export_id': str, 'processed_count': int, 'zip_filename': str}
+        """
+        export_id = str(uuid.uuid4())
+        export_dir = os.path.join(self.export_folder, export_id)
+        os.makedirs(export_dir)
+
+        try:
+            processed = 0
+            seen_names = {}
+
+            for item in image_info_list:
+                image_id = item['image_id']
+                original_filename = item.get('original_filename', image_id)
+
+                image_path = self.get_image_path(batch_id, image_id, thumbnail=False)
+                if not image_path:
+                    continue
+
+                with Image.open(image_path) as img:
+                    img = img.copy()  # fully load into memory
+
+                base = os.path.splitext(original_filename)[0]
+                out_name = f'{base}.png'
+                if out_name in seen_names:
+                    seen_names[out_name] += 1
+                    out_name = f'{base}_{seen_names[out_name]}.png'
+                else:
+                    seen_names[out_name] = 0
+
+                out_path = os.path.join(export_dir, out_name)
+                img.save(out_path, 'PNG')
+                processed += 1
+
+            if processed == 0:
+                shutil.rmtree(export_dir)
+                raise ValueError('No images could be converted')
+
+            zip_filename = f'{export_id}_converted_png.zip'
+            zip_path = os.path.join(self.export_folder, zip_filename)
+            # Use ZIP_STORED — PNG files are already compressed
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_STORED) as zf:
+                for fname in os.listdir(export_dir):
+                    zf.write(os.path.join(export_dir, fname), fname)
+
+            shutil.rmtree(export_dir)
+
+            return {
+                'export_id': export_id,
+                'processed_count': processed,
+                'zip_filename': zip_filename,
+            }
+
+        except Exception:
+            if os.path.exists(export_dir):
+                shutil.rmtree(export_dir, ignore_errors=True)
+            raise
 
     def delete_batch(self, batch_id):
         """Delete all images in a batch."""

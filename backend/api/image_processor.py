@@ -177,6 +177,40 @@ def download_export(export_id):
         return jsonify({'error': str(e)}), 500
 
 
+@image_bp.route('/images/batch/<batch_id>/convert_to_png', methods=['POST'])
+def convert_to_png(batch_id):
+    """
+    Losslessly convert uploaded images to PNG and return a download URL for the ZIP.
+
+    Request body (JSON):
+    {
+        "image_info": [
+            {"image_id": "...", "original_filename": "photo.webp"},
+            ...
+        ]
+    }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No request body'}), 400
+
+        image_info = data.get('image_info', [])
+        if not image_info:
+            return jsonify({'error': 'image_info is empty'}), 400
+
+        result = _svc.convert_to_png(batch_id, image_info)
+
+        return jsonify({
+            'export_id': result['export_id'],
+            'processed_count': result['processed_count'],
+            'download_url': f'/api/images/exports/{result["export_id"]}/download',
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @image_bp.route('/images/batch/<batch_id>', methods=['DELETE'])
 def delete_batch(batch_id):
     """Delete all images in a batch."""

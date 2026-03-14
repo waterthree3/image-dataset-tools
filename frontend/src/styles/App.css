@@ -679,6 +679,63 @@ body {
 }
 
 /* ================================================================
+   WebP → PNG converter card
+   ================================================================ */
+.webp-converter-card {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.webp-converter-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  flex-wrap: wrap;
+}
+
+.webp-converter-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+}
+
+.webp-converter-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.webp-converter-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.webp-file-count {
+  color: #444;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.webp-convert-btn {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 0;
+}
+
+.section-divider {
+  height: 1.5rem;
+}
+
+/* ================================================================
    Image Processor — two-column layout
    ================================================================ */
 .image-processor-layout {

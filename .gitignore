@@ -12,13 +12,21 @@ env/
 instance/
 .webassets-cache
 
-# Storage directories
+# Storage directories (runtime data, not for version control)
 backend/storage/uploads/
 backend/storage/frames/
 backend/storage/exports/
+backend/storage/image_batches/
+backend/storage/image_exports/
 backend/*.jpg
 backend/*.jpeg
 backend/*.png
+
+# Output directory
+output/
+
+# Claude Code internal files
+.claude/
 
 # Node.js
 node_modules/
