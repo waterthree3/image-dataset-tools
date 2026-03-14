@@ -1761,3 +1761,450 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ================================================================
+   Language toggle button
+   ================================================================ */
+.lang-toggle-btn {
+  padding: 0.4rem 0.9rem;
+  background: transparent;
+  border: 2px solid #667eea;
+  color: #667eea;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  margin-left: 0.5rem;
+}
+
+.lang-toggle-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* ================================================================
+   Batch crop / scale section header card
+   ================================================================ */
+.batch-crop-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.batch-crop-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  flex-wrap: wrap;
+}
+
+.batch-crop-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+}
+
+.batch-crop-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.batch-crop-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Remove top margin/padding from upload area when inside card body */
+.batch-crop-body .image-upload-area {
+  margin-bottom: 0;
+}
+
+/* ================================================================
+   AI Smart Split panel
+   ================================================================ */
+.ai-panel {
+  border: 2px solid #e8ebff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ai-panel-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #434343 0%, #000000 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.ai-panel-toggle:hover {
+  opacity: 0.9;
+}
+
+.ai-toggle-arrow {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.ai-panel-body {
+  padding: 1rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Provider tabs */
+.ai-provider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ai-provider-tabs {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.ai-provider-tab {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-provider-tab.active {
+  background: #333;
+  border-color: #333;
+  color: white;
+}
+
+.ai-provider-tab:hover:not(.active) {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+/* Field rows */
+.ai-field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.ai-field-col {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ai-field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.ai-text-input {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  min-width: 0;
+  transition: border-color 0.2s;
+}
+
+.ai-text-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Sample interval */
+.ai-interval-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.ai-interval-btn {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.82rem;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-interval-btn.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+.ai-interval-btn:hover:not(.active) {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.ai-interval-input {
+  width: 54px;
+  padding: 0.3rem 0.4rem;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.82rem;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.ai-interval-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.ai-interval-unit {
+  font-size: 0.82rem;
+  color: #888;
+}
+
+/* Requirements */
+.ai-reqs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.ai-reqs-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ai-import-btn {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  background: white;
+  color: #555;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-import-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.ai-clear-reqs-btn {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  background: white;
+  color: #c33;
+  border: 2px solid #e0a0a0;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-clear-reqs-btn:hover {
+  background: #fee;
+}
+
+.ai-reqs-textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.ai-reqs-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Analyze button */
+.ai-analyze-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #434343 0%, #000000 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.ai-analyze-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.35);
+}
+
+.ai-analyze-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ai-analyzing-hint {
+  font-size: 0.82rem;
+  color: #888;
+  text-align: center;
+  padding: 0.3rem 0;
+}
+
+/* Results */
+.ai-results {
+  border: 2px solid #e8ebff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ai-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  background: #f0f2ff;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ai-results-summary {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.ai-add-all-btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.ai-add-all-btn:hover {
+  background: #5568d3;
+}
+
+.ai-no-results {
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: #888;
+  text-align: center;
+}
+
+.ai-result-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ai-result-list::-webkit-scrollbar { width: 5px; }
+.ai-result-list::-webkit-scrollbar-track { background: #f1f1f1; }
+.ai-result-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+
+.ai-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+}
+
+.ai-result-item:last-child {
+  border-bottom: none;
+}
+
+.ai-result-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.ai-result-thumb {
+  width: 90px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ai-result-thumb:hover {
+  opacity: 0.8;
+}
+
+.ai-result-time {
+  font-size: 0.68rem;
+  font-family: 'Courier New', monospace;
+  color: #888;
+}
+
+.ai-result-reason {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #444;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ai-add-frame-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.ai-add-frame-btn:hover {
+  background: #5568d3;
+}

@@ -255,6 +255,18 @@ export const api = {
   deleteImageBatch: (batchId) => {
     return apiClient.delete(`/images/batch/${batchId}`);
   },
+
+  /**
+   * AI 智能分析视频并推荐帧
+   * @param {string} videoId
+   * @param {object} params - { api_key, model, base_url, api_format, requirements, sample_interval }
+   * @returns {Promise<{selected_frames, total_sampled, model}>}
+   */
+  aiAnalyzeVideo: (videoId, params) => {
+    return apiClient.post(`/videos/${videoId}/ai_analyze`, params, {
+      timeout: 600000,  // 10 minutes — long videos may take a while
+    });
+  },
 };
 
 export default api;

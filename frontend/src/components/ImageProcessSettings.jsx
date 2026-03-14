@@ -1,4 +1,5 @@
 import { useState, useImperativeHandle, forwardRef } from 'react';
+import { useLang } from '../LangContext';
 
 const RATIO_PRESETS = [
   { label: '1:1',  w: 1,  h: 1  },
@@ -29,6 +30,7 @@ const ALIGN_CELLS = [
 const ImageProcessSettings = forwardRef(function ImageProcessSettings(
   { selectedCount, onApply, onClearSettings }, ref
 ) {
+  const { t } = useLang();
   const [mode, setMode] = useState('scale');
 
   // Scale mode
@@ -82,31 +84,33 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
 
   return (
     <div className="image-process-settings">
-      <h3>处理设置</h3>
+      <h3>{t('处理设置', 'Processing Settings')}</h3>
 
       {selectedCount === 0 && (
-        <p className="settings-hint">请先在左侧选择图片，再配置处理方式</p>
+        <p className="settings-hint">
+          {t('请先在左侧选择图片，再配置处理方式', 'Select images on the left first, then configure settings')}
+        </p>
       )}
 
       {/* Mode selector */}
       <div className="option-group">
-        <label>处理模式</label>
+        <label>{t('处理模式', 'Mode')}</label>
         <div className="mode-tabs">
           <button
             className={`mode-tab ${mode === 'scale' ? 'active' : ''}`}
             onClick={() => setMode('scale')}
-            title="保持宽高比缩放到指定最大尺寸"
-          >缩放</button>
+            title={t('保持宽高比缩放到指定最大尺寸', 'Scale to max size, preserving aspect ratio')}
+          >{t('缩放', 'Scale')}</button>
           <button
             className={`mode-tab ${mode === 'crop' ? 'active' : ''}`}
             onClick={() => setMode('crop')}
-            title="裁切到目标宽高比"
-          >裁切</button>
+            title={t('裁切到目标宽高比', 'Crop to target aspect ratio')}
+          >{t('裁切', 'Crop')}</button>
           <button
             className={`mode-tab ${mode === 'pad' ? 'active' : ''}`}
             onClick={() => setMode('pad')}
-            title="填充黑边到目标宽高比"
-          >填黑边</button>
+            title={t('填充黑边到目标宽高比', 'Letterbox to target aspect ratio')}
+          >{t('填黑边', 'Letterbox')}</button>
         </div>
       </div>
 
@@ -114,18 +118,19 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
       {mode === 'scale' && (
         <div className="mode-settings">
           <p className="mode-desc">
-            保持原始宽高比缩放，图片不超过设定的最大尺寸。留空表示该方向不限制。
+            {t('保持原始宽高比缩放，图片不超过设定的最大尺寸。留空表示该方向不限制。',
+               'Scale while preserving aspect ratio. Leave blank to skip that dimension.')}
           </p>
           <div className="size-inputs">
             <div className="size-input-group">
-              <label>最大宽度 (px)</label>
-              <input type="number" placeholder="不限" value={maxWidth}
+              <label>{t('最大宽度 (px)', 'Max Width (px)')}</label>
+              <input type="number" placeholder={t('不限', 'None')} value={maxWidth}
                 onChange={e => setMaxWidth(e.target.value)} min="1" className="size-input" />
             </div>
             <span className="size-sep">×</span>
             <div className="size-input-group">
-              <label>最大高度 (px)</label>
-              <input type="number" placeholder="不限" value={maxHeight}
+              <label>{t('最大高度 (px)', 'Max Height (px)')}</label>
+              <input type="number" placeholder={t('不限', 'None')} value={maxHeight}
                 onChange={e => setMaxHeight(e.target.value)} min="1" className="size-input" />
             </div>
           </div>
@@ -136,7 +141,8 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
       {mode === 'crop' && (
         <div className="mode-settings">
           <p className="mode-desc">
-            裁切到目标宽高比，超出比例的部分被移除。通过下方滑块控制保留哪个区域。
+            {t('裁切到目标宽高比，超出比例的部分被移除。通过下方滑块控制保留哪个区域。',
+               'Crop to the target aspect ratio. Use sliders to control which area to keep.')}
           </p>
           <RatioSelector
             ratioW={ratioW} ratioH={ratioH}
@@ -146,23 +152,27 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
 
           {/* Crop position sliders */}
           <div className="option-group crop-anchor-group">
-            <label>裁切位置</label>
+            <label>{t('裁切位置', 'Crop Position')}</label>
             <div className="anchor-slider-row">
-              <span className="anchor-label-side">左</span>
+              <span className="anchor-label-side">{t('左', 'L')}</span>
               <input type="range" min="0" max="100" value={cropAnchorX}
                 onChange={e => setCropAnchorX(Number(e.target.value))}
                 className="anchor-slider" />
-              <span className="anchor-label-side">右</span>
+              <span className="anchor-label-side">{t('右', 'R')}</span>
             </div>
-            <div className="anchor-slider-desc">水平（图片过宽时生效）</div>
+            <div className="anchor-slider-desc">
+              {t('水平（图片过宽时生效）', 'Horizontal (when image is wider)')}
+            </div>
             <div className="anchor-slider-row" style={{ marginTop: '0.5rem' }}>
-              <span className="anchor-label-side">上</span>
+              <span className="anchor-label-side">{t('上', 'T')}</span>
               <input type="range" min="0" max="100" value={cropAnchorY}
                 onChange={e => setCropAnchorY(Number(e.target.value))}
                 className="anchor-slider" />
-              <span className="anchor-label-side">下</span>
+              <span className="anchor-label-side">{t('下', 'B')}</span>
             </div>
-            <div className="anchor-slider-desc">垂直（图片过高时生效）</div>
+            <div className="anchor-slider-desc">
+              {t('垂直（图片过高时生效）', 'Vertical (when image is taller)')}
+            </div>
           </div>
 
           <OutputSizeInputs
@@ -176,7 +186,8 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
       {mode === 'pad' && (
         <div className="mode-settings">
           <p className="mode-desc">
-            在图片周围填充黑边以达到目标宽高比。通过对齐格控制图片在画布中的位置。
+            {t('在图片周围填充黑边以达到目标宽高比。通过对齐格控制图片在画布中的位置。',
+               'Add black bars to reach the target aspect ratio. Use the grid to position the image.')}
           </p>
           <RatioSelector
             ratioW={ratioW} ratioH={ratioH}
@@ -186,14 +197,14 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
 
           {/* Pad alignment grid */}
           <div className="option-group">
-            <label>图片对齐</label>
+            <label>{t('图片对齐', 'Image Alignment')}</label>
             <div className="align-grid">
               {ALIGN_CELLS.map(([label, ax, ay]) => (
                 <button
                   key={`${ax}-${ay}`}
                   className={`align-cell ${padAnchorX === ax && padAnchorY === ay ? 'active' : ''}`}
                   onClick={() => { setPadAnchorX(ax); setPadAnchorY(ay); }}
-                  title={`水平${Math.round(ax * 100)}% 垂直${Math.round(ay * 100)}%`}
+                  title={`H${Math.round(ax * 100)}% V${Math.round(ay * 100)}%`}
                 >
                   {label}
                 </button>
@@ -215,14 +226,14 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
           onClick={handleApply}
           disabled={selectedCount === 0}
         >
-          应用到已选 ({selectedCount})
+          {t(`应用到已选 (${selectedCount})`, `Apply to Selected (${selectedCount})`)}
         </button>
         <button
           className="clear-settings-btn"
           onClick={onClearSettings}
           disabled={selectedCount === 0}
         >
-          清除设置
+          {t('清除设置', 'Clear')}
         </button>
       </div>
 
@@ -232,9 +243,10 @@ const ImageProcessSettings = forwardRef(function ImageProcessSettings(
 
 /** Shared ratio selector. */
 function RatioSelector({ ratioW, ratioH, setRatioW, setRatioH, onPreset }) {
+  const { t } = useLang();
   return (
     <div className="option-group">
-      <label>目标宽高比</label>
+      <label>{t('目标宽高比', 'Target Ratio')}</label>
       <div className="ratio-presets">
         {RATIO_PRESETS.map(p => (
           <button
@@ -259,19 +271,20 @@ function RatioSelector({ ratioW, ratioH, setRatioW, setRatioH, onPreset }) {
 
 /** Optional output dimensions for crop/pad modes. */
 function OutputSizeInputs({ outputWidth, outputHeight, setOutputWidth, setOutputHeight }) {
+  const { t } = useLang();
   return (
     <div className="option-group">
-      <label>输出尺寸（可选，留空则保持像素量）</label>
+      <label>{t('输出尺寸（可选，留空则保持像素量）', 'Output Size (optional, leave blank to auto)')}</label>
       <div className="size-inputs">
         <div className="size-input-group">
-          <label>宽度 (px)</label>
-          <input type="number" placeholder="自动" value={outputWidth}
+          <label>{t('宽度 (px)', 'Width (px)')}</label>
+          <input type="number" placeholder={t('自动', 'Auto')} value={outputWidth}
             onChange={e => setOutputWidth(e.target.value)} min="1" className="size-input" />
         </div>
         <span className="size-sep">×</span>
         <div className="size-input-group">
-          <label>高度 (px)</label>
-          <input type="number" placeholder="自动" value={outputHeight}
+          <label>{t('高度 (px)', 'Height (px)')}</label>
+          <input type="number" placeholder={t('自动', 'Auto')} value={outputHeight}
             onChange={e => setOutputHeight(e.target.value)} min="1" className="size-input" />
         </div>
       </div>

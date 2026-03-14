@@ -1,28 +1,30 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { api } from '../services/api';
 import ImageProcessSettings from './ImageProcessSettings';
+import { useLang } from '../LangContext';
 
 /** Modal that shows a before/after preview for a single image. */
 function PreviewModal({ originalUrl, previewUrl, filename, onClose, loading, error }) {
+  const { t } = useLang();
   return (
     <div className="preview-overlay" onClick={onClose}>
       <div className="preview-modal" onClick={e => e.stopPropagation()}>
         <div className="preview-modal-header">
-          <span className="preview-modal-title">预览：{filename}</span>
+          <span className="preview-modal-title">{t('预览：', 'Preview: ')}{filename}</span>
           <button className="preview-close-btn" onClick={onClose}>✕</button>
         </div>
-        {loading && <div className="preview-loading">处理中…</div>}
+        {loading && <div className="preview-loading">{t('处理中…', 'Processing…')}</div>}
         {error   && <div className="preview-error">{error}</div>}
         {!loading && !error && (
           <div className="preview-images">
             <div className="preview-col">
-              <div className="preview-col-label">原图</div>
-              <img src={originalUrl} alt="原图" className="preview-img" />
+              <div className="preview-col-label">{t('原图', 'Original')}</div>
+              <img src={originalUrl} alt={t('原图', 'Original')} className="preview-img" />
             </div>
             <div className="preview-divider" />
             <div className="preview-col">
-              <div className="preview-col-label">处理后</div>
-              <img src={previewUrl} alt="处理后" className="preview-img" />
+              <div className="preview-col-label">{t('处理后', 'Processed')}</div>
+              <img src={previewUrl} alt={t('处理后', 'Processed')} className="preview-img" />
             </div>
           </div>
         )}
@@ -33,6 +35,7 @@ function PreviewModal({ originalUrl, previewUrl, filename, onClose, loading, err
 
 /** WebP → PNG lossless converter — self-contained quick-tool section. */
 function WebpToPngConverter() {
+  const { t } = useLang();
   const [webpFiles, setWebpFiles]   = useState([]);
   const [status, setStatus]         = useState(null); // null|'uploading'|'converting'|'done'|'error'
   const [progress, setProgress]     = useState({ current: 0, total: 0 });
@@ -50,7 +53,7 @@ function WebpToPngConverter() {
     const webps = Array.from(files).filter(f => /\.(webp|avif)$/i.test(f.name));
     setWebpFiles(webps);
     setMessage(null);
-    setError(webps.length === 0 ? '所选文件中没有 WebP / AVIF 格式的图片' : null);
+    setError(webps.length === 0 ? t('所选文件中没有 WebP / AVIF 格式的图片', 'No WebP / AVIF images in selected files') : null);
   };
 
   const handleConvert = async () => {
@@ -73,7 +76,7 @@ function WebpToPngConverter() {
         setProgress({ current: Math.min(i + CHUNK, webpFiles.length), total: webpFiles.length });
       }
 
-      if (uploadedItems.length === 0) throw new Error('没有文件上传成功');
+      if (uploadedItems.length === 0) throw new Error(t('没有文件上传成功', 'No files uploaded successfully'));
 
       setStatus('converting');
       const imageInfoList = uploadedItems.map(u => ({
@@ -94,10 +97,11 @@ function WebpToPngConverter() {
       URL.revokeObjectURL(url);
 
       setStatus('done');
-      setMessage(`成功转换 ${data.processed_count} 个 WebP 文件，下载已开始`);
+      setMessage(t(`成功转换 ${data.processed_count} 个 WebP 文件，下载已开始`,
+                   `Successfully converted ${data.processed_count} files, download started`));
     } catch (err) {
       setStatus('error');
-      setError('转换失败：' + (err.response?.data?.error || err.message));
+      setError(t('转换失败：', 'Conversion failed: ') + (err.response?.data?.error || err.message));
     }
   };
 
@@ -107,17 +111,20 @@ function WebpToPngConverter() {
   return (
     <div className="webp-converter-card">
       <div className="webp-converter-header">
-        <span className="webp-converter-title">WebP / AVIF → PNG 无损转换</span>
-        <span className="webp-converter-desc">将文件夹中的所有 WebP / AVIF 文件无损转换为 PNG，打包下载</span>
+        <span className="webp-converter-title">{t('WebP / AVIF → PNG 无损转换', 'WebP / AVIF → PNG Lossless Conversion')}</span>
+        <span className="webp-converter-desc">
+          {t('将文件夹中的所有 WebP / AVIF 文件无损转换为 PNG，打包下载',
+             'Convert all WebP / AVIF files in a folder to PNG losslessly, download as ZIP')}
+        </span>
       </div>
 
       <div className="webp-converter-body">
         <div className="image-upload-buttons">
           <button className="folder-select-btn" onClick={() => folderInputRef.current?.click()} disabled={isRunning}>
-            📁 选择文件夹
+            📁 {t('选择文件夹', 'Select Folder')}
           </button>
           <button className="file-select-btn" onClick={() => fileInputRef.current?.click()} disabled={isRunning}>
-            🖼️ 选择 WebP / AVIF 文件
+            🖼️ {t('选择 WebP / AVIF 文件', 'Select WebP / AVIF Files')}
           </button>
         </div>
 
@@ -127,7 +134,10 @@ function WebpToPngConverter() {
           onChange={e => { handleFiles(e.target.files); e.target.value = ''; }} />
 
         {webpFiles.length > 0 && !error && (
-          <p className="webp-file-count">已选择 <strong>{webpFiles.length}</strong> 个 WebP / AVIF 文件</p>
+          <p className="webp-file-count">
+            {t(`已选择 ${webpFiles.length} 个 WebP / AVIF 文件`,
+               `Selected ${webpFiles.length} WebP / AVIF file(s)`)}
+          </p>
         )}
 
         {error   && <div className="error-message">{error}</div>}
@@ -138,7 +148,10 @@ function WebpToPngConverter() {
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${progressPct}%` }} />
             </div>
-            <p>{status === 'uploading' ? `上传中… ${progress.current} / ${progress.total}` : '转换中…'}</p>
+            <p>{status === 'uploading'
+              ? `${t('上传中…', 'Uploading…')} ${progress.current} / ${progress.total}`
+              : t('转换中…', 'Converting…')}
+            </p>
           </div>
         )}
 
@@ -148,8 +161,9 @@ function WebpToPngConverter() {
           disabled={webpFiles.length === 0 || isRunning}
         >
           {isRunning
-            ? (status === 'converting' ? '转换中…' : '上传中…')
-            : `无损转换为 PNG 并下载（${webpFiles.length || 0} 个文件）`}
+            ? (status === 'converting' ? t('转换中…', 'Converting…') : t('上传中…', 'Uploading…'))
+            : t(`无损转换为 PNG 并下载（${webpFiles.length || 0} 个文件）`,
+                `Lossless Convert to PNG & Download (${webpFiles.length || 0} files)`)}
         </button>
       </div>
     </div>
@@ -167,16 +181,24 @@ function isImage(filename) {
 }
 
 /** Return a short human-readable description of an image's settings. */
-function settingsBadge(settings) {
+function settingsBadge(settings, lang) {
   if (!settings) return null;
   if (settings.mode === 'scale') {
     const parts = [];
     if (settings.maxWidth)  parts.push(`W≤${settings.maxWidth}`);
     if (settings.maxHeight) parts.push(`H≤${settings.maxHeight}`);
-    return parts.length > 0 ? `缩放 ${parts.join(' ')}` : '缩放（不变）';
+    const label = lang === 'zh' ? '缩放' : 'Scale';
+    const none  = lang === 'zh' ? '（不变）' : '(no change)';
+    return parts.length > 0 ? `${label} ${parts.join(' ')}` : `${label}${none}`;
   }
-  if (settings.mode === 'crop') return `裁切 ${settings.ratioW}:${settings.ratioH}`;
-  if (settings.mode === 'pad')  return `填边 ${settings.ratioW}:${settings.ratioH}`;
+  if (settings.mode === 'crop') {
+    const label = lang === 'zh' ? '裁切' : 'Crop';
+    return `${label} ${settings.ratioW}:${settings.ratioH}`;
+  }
+  if (settings.mode === 'pad') {
+    const label = lang === 'zh' ? '填边' : 'Pad';
+    return `${label} ${settings.ratioW}:${settings.ratioH}`;
+  }
   return null;
 }
 
@@ -194,6 +216,7 @@ function settingsBadge(settings) {
  *      receives a ZIP, and triggers browser download.
  */
 function ImageBatchProcessor() {
+  const { lang, t } = useLang();
   const [batchId, setBatchId]     = useState(null);
   const [images, setImages]       = useState([]);   // {id, filename, width, height, thumbUrl, settings}
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -222,7 +245,8 @@ function ImageBatchProcessor() {
   const uploadFiles = useCallback(async (files) => {
     const imageFiles = Array.from(files).filter(f => isImage(f.name));
     if (imageFiles.length === 0) {
-      setError('所选文件中没有支持的图片格式（JPG、PNG、BMP、WebP、GIF、TIFF）');
+      setError(t('所选文件中没有支持的图片格式（JPG、PNG、BMP、WebP、GIF、TIFF）',
+                 'No supported image formats found (JPG, PNG, BMP, WebP, GIF, TIFF)'));
       return;
     }
 
@@ -260,18 +284,19 @@ function ImageBatchProcessor() {
         setImages([...allImages]);
       }
 
-      setSuccessMsg(`已上传 ${allImages.length} 张图片，请选择图片并配置处理方式`);
+      setSuccessMsg(t(`已上传 ${allImages.length} 张图片，请选择图片并配置处理方式`,
+                      `Uploaded ${allImages.length} image(s). Select images and configure processing.`));
     } catch (err) {
-      setError('上传失败：' + (err.response?.data?.error || err.message));
+      setError(t('上传失败：', 'Upload failed: ') + (err.response?.data?.error || err.message));
     } finally {
       setUploading(false);
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const handleFileInput = (e) => {
     if (e.target.files?.length > 0) {
       uploadFiles(e.target.files);
-      // Reset so the same folder can be re-selected
       e.target.value = '';
     }
   };
@@ -294,7 +319,8 @@ function ImageBatchProcessor() {
     setImages(prev =>
       prev.map(img => selectedIds.has(img.id) ? { ...img, settings } : img)
     );
-    setSuccessMsg(`已为 ${selectedIds.size} 张图片应用设置`);
+    setSuccessMsg(t(`已为 ${selectedIds.size} 张图片应用设置`,
+                    `Settings applied to ${selectedIds.size} image(s)`));
     setError(null);
   };
 
@@ -326,7 +352,7 @@ function ImageBatchProcessor() {
       setPreview(prev => ({
         ...prev,
         loading: false,
-        error: '预览失败：' + (err.response?.data?.error || err.message),
+        error: t('预览失败：', 'Preview failed: ') + (err.response?.data?.error || err.message),
       }));
     }
   };
@@ -342,7 +368,6 @@ function ImageBatchProcessor() {
       const imageSettings = images.map(img => {
         const s = img.settings;
         if (!s) {
-          // No settings → copy as-is (scale with no constraints)
           return {
             image_id:          img.id,
             original_filename: img.filename,
@@ -368,7 +393,6 @@ function ImageBatchProcessor() {
 
       const { data } = await api.processImages(batchId, imageSettings, exportFormat, quality);
 
-      // Trigger download
       const blobResp = await api.downloadImageExport(data.export_id);
       const url = URL.createObjectURL(blobResp.data);
       const a   = document.createElement('a');
@@ -379,9 +403,10 @@ function ImageBatchProcessor() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setSuccessMsg(`成功处理 ${data.processed_count} 张图片，下载已开始`);
+      setSuccessMsg(t(`成功处理 ${data.processed_count} 张图片，下载已开始`,
+                      `Successfully processed ${data.processed_count} image(s), download started`));
     } catch (err) {
-      setError('处理失败：' + (err.response?.data?.error || err.message));
+      setError(t('处理失败：', 'Processing failed: ') + (err.response?.data?.error || err.message));
     } finally {
       setProcessing(false);
     }
@@ -399,211 +424,229 @@ function ImageBatchProcessor() {
 
       <div className="section-divider" />
 
-      {/* ── Preview modal ─────────────────────────────────────── */}
-      {preview && (
-        <PreviewModal
-          originalUrl={preview.originalUrl}
-          previewUrl={preview.previewUrl}
-          filename={preview.filename}
-          loading={preview.loading}
-          error={preview.error}
-          onClose={() => {
-            if (preview.previewUrl) URL.revokeObjectURL(preview.previewUrl);
-            setPreview(null);
-          }}
-        />
-      )}
-
-      {/* ── Upload controls ──────────────────────────────────── */}
-      <div className="image-upload-area">
-        <div className="image-upload-buttons">
-          <button
-            className="folder-select-btn"
-            onClick={() => folderInputRef.current?.click()}
-            disabled={uploading}
-          >
-            📁 选择文件夹
-          </button>
-          <button
-            className="file-select-btn"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            🖼️ 选择图片
-          </button>
+      {/* ── Batch crop / scale section ────────────────────────── */}
+      <div className="batch-crop-card">
+        <div className="batch-crop-header">
+          <span className="batch-crop-title">✂️ {t('批量裁切 / 缩放', 'Batch Crop / Scale')}</span>
+          <span className="batch-crop-desc">
+            {t('对同一批次的图片分别配置缩放、裁切或填黑边参数，批量导出 ZIP',
+               'Configure scale, crop or letterbox per image in a batch, then export as ZIP')}
+          </span>
         </div>
 
-        {/* Hidden file inputs */}
-        <input
-          ref={folderInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleFileInput}
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleFileInput}
-        />
+        <div className="batch-crop-body">
+          {/* ── Preview modal ─────────────────────────────────────── */}
+          {preview && (
+            <PreviewModal
+              originalUrl={preview.originalUrl}
+              previewUrl={preview.previewUrl}
+              filename={preview.filename}
+              loading={preview.loading}
+              error={preview.error}
+              onClose={() => {
+                if (preview.previewUrl) URL.revokeObjectURL(preview.previewUrl);
+                setPreview(null);
+              }}
+            />
+          )}
 
-        {uploading && (
-          <div className="upload-progress-info">
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+          {/* ── Upload controls ──────────────────────────────────── */}
+          <div className="image-upload-area">
+            <div className="image-upload-buttons">
+              <button
+                className="folder-select-btn"
+                onClick={() => folderInputRef.current?.click()}
+                disabled={uploading}
+              >
+                📁 {t('选择文件夹', 'Select Folder')}
+              </button>
+              <button
+                className="file-select-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                🖼️ {t('选择图片', 'Select Images')}
+              </button>
             </div>
-            <p>上传中… {uploadProgress.current} / {uploadProgress.total} 张</p>
-          </div>
-        )}
 
-        {error      && <div className="error-message">{error}</div>}
-        {successMsg && !error && <div className="message success-message">{successMsg}</div>}
-      </div>
+            {/* Hidden file inputs */}
+            <input
+              ref={folderInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileInput}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileInput}
+            />
 
-      {/* ── Image grid + settings sidebar ────────────────────── */}
-      {images.length > 0 && (
-        <div className="image-processor-layout">
-
-          {/* Left: image grid */}
-          <div className="image-batch-grid-section">
-            <div className="image-batch-toolbar">
-              <span>
-                {images.length} 张图片 &nbsp;·&nbsp;
-                {selectedIds.size} 已选中 &nbsp;·&nbsp;
-                {configuredCount} 已配置
-              </span>
-              <div className="toolbar-btns">
-                <button onClick={selectAll}>全选</button>
-                <button onClick={clearSelect}>取消全选</button>
+            {uploading && (
+              <div className="upload-progress-info">
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+                </div>
+                <p>{t('上传中…', 'Uploading…')} {uploadProgress.current} / {uploadProgress.total}</p>
               </div>
-            </div>
+            )}
 
-            <div className="image-batch-grid">
-              {images.map(img => (
-                <div
-                  key={img.id}
-                  className={`image-batch-item ${selectedIds.has(img.id) ? 'selected' : ''}`}
-                  onClick={() => toggleImage(img.id)}
+            {error      && <div className="error-message">{error}</div>}
+            {successMsg && !error && <div className="message success-message">{successMsg}</div>}
+          </div>
+
+          {/* ── Image grid + settings sidebar ────────────────────── */}
+          {images.length > 0 && (
+            <div className="image-processor-layout">
+
+              {/* Left: image grid */}
+              <div className="image-batch-grid-section">
+                <div className="image-batch-toolbar">
+                  <span>
+                    {lang === 'zh'
+                      ? `${images.length} 张图片 · ${selectedIds.size} 已选中 · ${configuredCount} 已配置`
+                      : `${images.length} image(s) · ${selectedIds.size} selected · ${configuredCount} configured`}
+                  </span>
+                  <div className="toolbar-btns">
+                    <button onClick={selectAll}>{t('全选', 'Select All')}</button>
+                    <button onClick={clearSelect}>{t('取消全选', 'Deselect All')}</button>
+                  </div>
+                </div>
+
+                <div className="image-batch-grid">
+                  {images.map(img => (
+                    <div
+                      key={img.id}
+                      className={`image-batch-item ${selectedIds.has(img.id) ? 'selected' : ''}`}
+                      onClick={() => toggleImage(img.id)}
+                    >
+                      <img
+                        src={img.thumbUrl}
+                        alt={img.filename}
+                        className="image-batch-thumb"
+                        loading="lazy"
+                      />
+
+                      {/* Checkbox + dimensions */}
+                      <div className="image-batch-overlay">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(img.id)}
+                          onChange={() => toggleImage(img.id)}
+                          onClick={e => e.stopPropagation()}
+                        />
+                        <span className="image-dim">{img.width}×{img.height}</span>
+                      </div>
+
+                      {/* Filename */}
+                      <div className="image-batch-name" title={img.filename}>
+                        {img.filename}
+                      </div>
+
+                      {/* Settings badge */}
+                      {img.settings && (
+                        <div className="settings-badge">
+                          {settingsBadge(img.settings, lang)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: settings panel */}
+              <aside className="image-settings-panel">
+                <ImageProcessSettings
+                  ref={settingsRef}
+                  selectedCount={selectedIds.size}
+                  onApply={applySettings}
+                  onClearSettings={clearSettings}
+                />
+
+                <button
+                  className="preview-settings-btn"
+                  onClick={handlePreview}
+                  disabled={selectedIds.size === 0}
+                  title={t('用当前设置预览第一张选中的图片', 'Preview the first selected image with current settings')}
                 >
-                  <img
-                    src={img.thumbUrl}
-                    alt={img.filename}
-                    className="image-batch-thumb"
-                    loading="lazy"
-                  />
+                  {t('预览效果', 'Preview')}
+                </button>
 
-                  {/* Checkbox + dimensions */}
-                  <div className="image-batch-overlay">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(img.id)}
-                      onChange={() => toggleImage(img.id)}
-                      onClick={e => e.stopPropagation()}
-                    />
-                    <span className="image-dim">{img.width}×{img.height}</span>
+                <hr className="panel-divider" />
+
+                {/* Export format */}
+                <div className="export-format-section">
+                  <h4>{t('导出格式', 'Export Format')}</h4>
+                  <div className="radio-group">
+                    <label>
+                      <input
+                        type="radio"
+                        value="jpeg"
+                        checked={exportFormat === 'jpeg'}
+                        onChange={() => setExportFormat('jpeg')}
+                      />
+                      JPEG
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="png"
+                        checked={exportFormat === 'png'}
+                        onChange={() => setExportFormat('png')}
+                      />
+                      PNG
+                    </label>
                   </div>
 
-                  {/* Filename */}
-                  <div className="image-batch-name" title={img.filename}>
-                    {img.filename}
-                  </div>
-
-                  {/* Settings badge */}
-                  {img.settings && (
-                    <div className="settings-badge">
-                      {settingsBadge(img.settings)}
+                  {exportFormat === 'jpeg' && (
+                    <div className="option-group" style={{ marginTop: '0.75rem' }}>
+                      <label>{t('JPEG 质量：', 'JPEG Quality: ')}{quality}</label>
+                      <input
+                        type="range"
+                        min="1"
+                        max="100"
+                        value={quality}
+                        onChange={e => setQuality(Number(e.target.value))}
+                        className="quality-slider"
+                      />
+                      <div className="quality-labels">
+                        <span>{t('低', 'Low')}</span><span>{t('高', 'High')}</span>
+                      </div>
                     </div>
                   )}
                 </div>
-              ))}
+
+                <button
+                  className="process-button"
+                  onClick={handleProcess}
+                  disabled={processing || images.length === 0}
+                >
+                  {processing
+                    ? t('处理中…', 'Processing…')
+                    : t(`处理并下载 ZIP（${images.length} 张）`,
+                        `Process & Download ZIP (${images.length})`)}
+                </button>
+              </aside>
             </div>
-          </div>
+          )}
 
-          {/* Right: settings panel */}
-          <aside className="image-settings-panel">
-            <ImageProcessSettings
-              ref={settingsRef}
-              selectedCount={selectedIds.size}
-              onApply={applySettings}
-              onClearSettings={clearSettings}
-            />
-
-            <button
-              className="preview-settings-btn"
-              onClick={handlePreview}
-              disabled={selectedIds.size === 0}
-              title="用当前设置预览第一张选中的图片"
-            >
-              预览效果
-            </button>
-
-            <hr className="panel-divider" />
-
-            {/* Export format */}
-            <div className="export-format-section">
-              <h4>导出格式</h4>
-              <div className="radio-group">
-                <label>
-                  <input
-                    type="radio"
-                    value="jpeg"
-                    checked={exportFormat === 'jpeg'}
-                    onChange={() => setExportFormat('jpeg')}
-                  />
-                  JPEG
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="png"
-                    checked={exportFormat === 'png'}
-                    onChange={() => setExportFormat('png')}
-                  />
-                  PNG
-                </label>
-              </div>
-
-              {exportFormat === 'jpeg' && (
-                <div className="option-group" style={{ marginTop: '0.75rem' }}>
-                  <label>JPEG 质量：{quality}</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    value={quality}
-                    onChange={e => setQuality(Number(e.target.value))}
-                    className="quality-slider"
-                  />
-                  <div className="quality-labels">
-                    <span>低</span><span>高</span>
-                  </div>
-                </div>
-              )}
+          {/* ── Empty state ───────────────────────────────────────── */}
+          {images.length === 0 && !uploading && (
+            <div className="image-empty-state">
+              <div className="image-empty-icon">🖼️</div>
+              <p>{t('点击「选择文件夹」导入整个文件夹，或点击「选择图片」导入单张/多张图片',
+                    'Click 「Select Folder」 to import a whole folder, or 「Select Images」 for individual files')}</p>
+              <p className="hint">{t('支持格式：JPG、PNG、BMP、WebP、GIF、TIFF',
+                                     'Supported: JPG, PNG, BMP, WebP, GIF, TIFF')}</p>
             </div>
-
-            <button
-              className="process-button"
-              onClick={handleProcess}
-              disabled={processing || images.length === 0}
-            >
-              {processing ? '处理中…' : `处理并下载 ZIP（${images.length} 张）`}
-            </button>
-          </aside>
+          )}
         </div>
-      )}
-
-      {/* ── Empty state ───────────────────────────────────────── */}
-      {images.length === 0 && !uploading && (
-        <div className="image-empty-state">
-          <div className="image-empty-icon">🖼️</div>
-          <p>点击"选择文件夹"导入整个文件夹，或点击"选择图片"导入单张/多张图片</p>
-          <p className="hint">支持格式：JPG、PNG、BMP、WebP、GIF、TIFF</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
