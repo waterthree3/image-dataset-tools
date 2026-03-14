@@ -1,11 +1,12 @@
 # 视频 / 图片处理工具
 
-一个功能完整的 Web 应用，包含**视频帧提取**和**图片批量裁切缩放**两大功能模块。
+一个功能完整的 Web 应用，包含**视频帧提取**和**图片批量裁切缩放**两大功能模块。支持中英文界面切换。
 
 ## 功能特性
 
 ### 视频拆解
 - 📹 **视频上传**：支持 MP4, AVI, MOV, MKV 格式，**无文件大小限制**
+- 📁 **文件夹批量模式**：选择整个文件夹，逐个进入视频时间轴操作，已选帧自动暂存，切换视频不丢失
 - 🎛️ **时间轴截帧**：拖动滑块实时预览任意时间点的画面，精确到毫秒
 - ⌨️ **键盘快捷键**：按住 `A` 逐帧后退，按住 `D` 逐帧前进；单次按下跳一帧，持续按住连续步进
 - ⏩ **快速导航**：±10 秒跳转按钮 + 逐帧步进按钮
@@ -13,6 +14,7 @@
 - 💾 **格式导出**：支持 PNG 和 JPEG 格式，可调节 JPEG 质量（全分辨率导出）
 - 📝 **智能命名**：自动使用视频文件名作为前缀，支持自定义
 - 📦 **批量下载**：自动打包成 ZIP 文件下载
+- 🤖 **AI 智能拆解**：接入大模型 API，自动对视频采样并根据自然语言需求筛选关键帧
 
 ### 图片批量处理
 - 📁 **批量导入**：支持选择整个文件夹或单独选取图片（JPG/PNG/BMP/WebP/GIF/TIFF）
@@ -24,6 +26,9 @@
 - 👁️ **实时预览**：选中图片后点击「预览效果」，对比查看原图与处理结果
 - 📐 **宽高比预设**：内置 1:1 / 4:3 / 3:2 / 16:9 / 21:9 / 9:16 / 2:3 / 3:4，也支持自定义
 - 📦 **ZIP 打包下载**：所有处理结果打包下载，支持 JPEG（可调质量）和 PNG 输出
+
+### 通用
+- 🌐 **中英文切换**：顶部导航栏一键切换，所有 UI 文字同步翻译
 
 ## 技术栈
 
@@ -51,7 +56,8 @@ video_split/
 │   │   ├── upload.py              # 视频上传 API
 │   │   ├── frame.py               # 视频帧 API（含时间轴取帧）
 │   │   ├── export.py              # 视频帧导出 API
-│   │   └── image_processor.py    # 图片批处理 API
+│   │   ├── image_processor.py    # 图片批处理 API
+│   │   └── ai_analyzer.py        # AI 大模型视频分析 API
 │   ├── services/
 │   │   ├── video_processor.py    # 视频处理逻辑
 │   │   └── image_batch_service.py # 图片批处理逻辑
@@ -64,10 +70,12 @@ video_split/
 ├── frontend/                       # React 前端
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── VideoUploader.jsx  # 视频上传组件
-│   │   │   ├── VideoTimeline.jsx  # 时间轴截帧组件
-│   │   │   ├── ImageBatchProcessor.jsx  # 图片批处理主组件
-│   │   │   └── ImageProcessSettings.jsx # 图片处理设置面板
+│   │   │   ├── VideoUploader.jsx      # 视频上传组件
+│   │   │   ├── VideoTimeline.jsx      # 时间轴截帧 + AI 拆解面板
+│   │   │   ├── VideoFolderList.jsx    # 文件夹多视频列表
+│   │   │   ├── ImageBatchProcessor.jsx    # 图片批处理主组件
+│   │   │   └── ImageProcessSettings.jsx   # 图片处理设置面板
+│   │   ├── LangContext.jsx        # 中英文切换 Context
 │   │   ├── services/api.js        # API 调用封装
 │   │   └── styles/App.css         # 全局样式
 │   └── package.json
@@ -114,12 +122,25 @@ npm run dev
 
 打开浏览器访问 http://localhost:5173，顶部 Tab 切换两个功能模块：
 
-**视频拆解：**
+**视频拆解（单个视频）：**
 1. 上传视频文件（支持拖放，无大小限制）
 2. 拖动时间轴滑块或按住 `A`/`D` 键逐帧导航，预览画面实时刷新
 3. 找到目标画面后点击「+ 添加此帧」，可添加多个时间点
 4. 在导出面板中选择格式（PNG/JPEG）、质量、文件名前缀
 5. 点击「导出并下载 ZIP」获取全分辨率帧图像
+
+**视频拆解（文件夹批量模式）：**
+1. 在首页点击「选择文件夹」，选取包含视频的目录
+2. 卡片列表显示目录内所有视频，已选帧数量以绿色角标展示
+3. 点击任意视频进入时间轴操作，点击「← 返回列表」保存当前选帧并切换下一个视频
+4. 所有视频操作完毕后，分别进入每个视频导出 ZIP
+
+**AI 智能拆解：**
+1. 在视频时间轴界面，展开底部「🤖 AI 智能拆解」面板
+2. 选择 API 接口（OpenAI / Anthropic / 自定义），填写 API Key 和模型
+3. 在「拆解需求」文本框描述想要提取的画面（支持从 `.md`/`.txt` 文件导入需求）
+4. 设置采样间隔（建议 5–10 秒），点击「开始 AI 分析」
+5. 分析完成后，查看 AI 推荐的帧列表（含缩略图和原因说明），单帧点击「+」或批量「全部添加」
 
 **图片处理：**
 1. 点击「选择文件夹」或「选择图片」导入图片
@@ -215,6 +236,32 @@ GET /api/exports/{export_id}/download
 Response: application/zip
 ```
 
+### AI 视频分析 API
+
+```
+POST /api/videos/{video_id}/ai_analyze
+Body: {
+  "api_key":         "sk-...",
+  "model":           "gpt-4o",
+  "base_url":        "https://api.openai.com/v1",  // OpenAI 兼容接口
+  "api_format":      "openai" | "anthropic",
+  "requirements":    "找出所有包含人物特写的镜头",
+  "sample_interval": 5   // 采样间隔（秒），最小 1
+}
+
+Response: {
+  "selected_frames": [
+    { "time": 12.5, "reason": "Close-up of a person's face" }
+  ],
+  "total_sampled": 48,
+  "model": "gpt-4o"
+}
+```
+
+- 支持 OpenAI 兼容接口（GPT-4o、Qwen-VL 等）和 Anthropic 原生接口（Claude 系列）
+- 超长视频自动分批（每批 20 帧）调用，结果去重并按时间排序
+- 超时设置 10 分钟，适合长视频分析
+
 ## 配置说明
 
 ### backend/config.py
@@ -297,6 +344,33 @@ MIT License
 欢迎提交 Issue 和 Pull Request！
 
 ## 更新日志
+
+### 2026-03-14 - 中英文切换 + AI 智能拆解 + 文件夹批量视频模式
+
+**新增功能:**
+- **中英文界面切换** — 顶部导航栏新增 EN/中 切换按钮，所有 UI 文字（视频上传区、时间轴、图片处理设置、按钮提示等）一键同步翻译
+- **AI 智能拆解面板** — 视频时间轴底部新增可折叠面板，支持 OpenAI 兼容（GPT-4o / Qwen-VL 等）和 Anthropic（Claude 系列）两种接口格式；自然语言描述需求，AI 自动采样视频帧并返回推荐帧列表（含缩略图 + 理由）；支持从 `.md`/`.txt` 文件导入需求，可单帧或批量添加到选取列表
+- **文件夹批量视频模式** — 首页新增「选择文件夹」入口，展示目录内所有视频的卡片列表；点击视频自动上传并进入时间轴；点击「← 返回列表」自动保存当前已选帧；每个视频的帧选取独立暂存，切换视频时不丢失
+
+**改进:**
+- 图片批处理区域增加标题卡片（紫色渐变 Header），与 WebP/AVIF 转换区域风格统一
+- 修复视频上传组件所有文案未跟随语言切换的问题
+
+**受影响文件:**
+- `frontend/src/LangContext.jsx` — 新建：React Context 提供 `lang` / `setLang` / `t(zh, en)` 给全局组件
+- `frontend/src/components/VideoUploader.jsx` — 全面接入 i18n
+- `frontend/src/components/VideoTimeline.jsx` — 接入 i18n；新增 AI 面板；支持 `initialFrames`/`onBack` props 用于文件夹模式帧暂存
+- `frontend/src/components/VideoFolderList.jsx` — 新建：文件夹视频列表卡片网格组件
+- `frontend/src/components/ImageBatchProcessor.jsx` — 增加标题卡片；接入 i18n
+- `frontend/src/components/ImageProcessSettings.jsx` — 接入 i18n
+- `frontend/src/App.jsx` — 新增文件夹模式状态管理；语言切换按钮
+- `frontend/src/services/api.js` — 新增 `aiAnalyzeVideo()` 方法（10 分钟超时）
+- `backend/api/ai_analyzer.py` — 新建：AI 分析蓝图，支持 OpenAI 兼容/Anthropic 双格式，按 20 帧分批调用
+- `backend/app.py` — 注册 `ai_bp` 蓝图
+- `backend/requirements.txt` — 新增 `requests>=2.31.0`
+- `frontend/src/styles/App.css` — 新增语言切换按钮、AI 面板、文件夹列表、首页双卡片布局样式
+
+---
 
 ### 2026-03-01 - 时间轴截帧模式 + 键盘快捷键 + 预览实时刷新
 
