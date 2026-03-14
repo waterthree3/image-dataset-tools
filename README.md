@@ -284,6 +284,10 @@ npm run build
 # 将 dist/ 目录部署到静态文件服务器（Nginx, Apache等）
 ```
 
+## 仓库地址
+
+GitHub: https://github.com/waterthree3/image-dataset-tools
+
 ## 许可证
 
 MIT License
